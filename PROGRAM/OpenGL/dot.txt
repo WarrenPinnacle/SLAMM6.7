@@ -1,0 +1,13 @@
+  Dot -- The Delphi OpenGL Toolkit
+************************************
+
+Dot, short for "Delphi OpenGL Toolkit", is a utility library designed to speed
+up OpenGL development. The Dot can help you manage rendering contexts for your
+application windows and for offscreen rendering buffers. It also contains a
+large library of vector and matrix math functions, an assortment of image and 3D
+model loaders, and more.
+
+For full documentation, see the Docs subdirectory. To get started quickly, see
+the example project in the Framework subdirectory.
+
+  Tom Nuydens (tom@delphi3d.net)

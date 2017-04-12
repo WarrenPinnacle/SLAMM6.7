@@ -1,0 +1,127 @@
+<html><!-- #BeginTemplate "/Templates/main.dwt" -->
+<head>
+<!-- #BeginEditable "doctitle" --> 
+<title>The Dot Docs</title>
+<!-- #EndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+<table width="100%" border="0" cellpadding="5">
+  <tr> 
+    <td width="200" align="center" valign="top"> 
+      <div align="center"> 
+        <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#000000"> 
+              <div align="center"><font color="#FFFFFF"><b><font size="+2">The 
+                Dot Docs </font></b></font></div>
+            </td>
+          </tr>
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+              <p align="left"></p>
+              <div align="center"> 
+                <p><a href="index.htm">Introduction</a></p>
+              </div>
+            <div align="center"> 
+                <p><b><font size="-1">[API header files]<br>
+                  </font></b><a href="GLunits.htm">GL.pas, GLu.pas, Glut.pas 
+                  and GLext.pas</a></p>
+                <p><font size="-1"><b>[RC and buffer management]<br>
+                  </b></font><a href="DotWindow.htm">DotWindow.pas<br>
+                  </a><a href="DotOffscreenBuffer.htm">DotOffscreenBuffer.pas<br>
+                  </a><a href="DotRTTBuffer.htm">DotRTTBuffer.pas</a></p>
+                <p><font size="-1"><b>[Shaders]<br>
+                  </b></font><a href="DotShaders.htm">DotShaders.pas</a></p>
+                <p><font size="-1"><b>[Math library]<br>
+                  </b></font><a href="DotMath.htm">DotMath.pas</a></p>
+                <p><b><font size="-1">[3D model loaders]<br>
+                  </font></b><a href="ModelLoaders.htm">ASE.pas, OBJ2.pas, 
+                  MD2.pas, MD3.pas</a></p>
+                <p><font size="-1"><b>[Image loaders]<br>
+                  </b></font><a href="ImageLoaders.htm">TGA2.pas</a></p>
+                <p><font size="-1"><b>[Misc. utilities]<br>
+                  </b></font><a href="DotUtils.htm">DotUtils.pas<br>
+                  </a><a href="DotVideo.htm">DotVideo.pas <br>
+                  </a><a href="NV_parse.htm">NV_parse.pas<br>
+                  </a><a href="Framework.htm">The Dot application framework</a></p>
+                <p><font size="-1"><b>[Powered by]</b></font><br>
+                  <a href="http://www.opengl.org" target="_blank"><img src="ogla_sm.gif" width="84" height="44" border="0" alt="OpenGL.org"></a></p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </td>
+    <td align="left" valign="top"> 
+      <div align="left"></div>
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#000000"> 
+            <div align="center"><font color="#FFFFFF"><b><!-- #BeginEditable "Header" --><font size="+2">DotVideo.pas</font><!-- #EndEditable --></b></font></div>
+          </td>
+        </tr>
+      </table>
+      <br>
+      <!-- #BeginEditable "Body" --> 
+      <p align="left">It is often interesting to be able to record a video of 
+        your running 3D application. <i>DotVideo.pas</i> gives you the tools to 
+        do so, in the form of a single, easy to use class called <i>TDotVideoRecorder</i>. 
+        The class has the following interface:</p>
+      <pre align="left">  TDotVideoRecorder = class
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure StartCapture(const name: String; const window: TForm; const fps: Integer);
+    procedure EndCapture;
+    function Snap: Boolean;
+    property OK: Boolean;
+    property NumFrames: Integer;
+  end;</pre>
+      <p align="left">To begin recording a video, you call <i>StartCapture()</i>. 
+        This method takes the filename of the video you want to save, the <i>TForm</i> 
+        from which you want to capture the video, and the framerate at which you 
+        want to capture (measured in frames per second). When called, it will 
+        pop up a dialog that allows you to choose a codec to use for saving your 
+        video.</p>
+      <p align="left">You are now ready to capture frames to your video. To do 
+        so, you call the <i>Snap()</i> method, which captures a single image from 
+        the source form and appends it to your video stream. Note that the time 
+        elapsed between <i>Snap()</i> calls is completely ignored -- if you specified 
+        20 fps when you called StartCapture(), your final video will be rendered 
+        at 20 images per second even if you called <i>Snap()</i> more or less 
+        often than 20 times per second. You can use a <i>TTimer</i> control or 
+        the <a href="DotUtils.htm">Dot timing functions</a> to make sure you <i>Snap()</i> 
+        at regular intervals.</p>
+      <p align="left">When you're done recording your video, you can call <i>EndCapture()</i> 
+        to close your video stream. Your file is now ready to be played back.</p>
+      <p align="left"><i>TDotVideoRecorder</i> has two more properties that are 
+        of interest. <i>NumFrames</i>, obviously, tells you how many frames have 
+        already been captured. <i>OK</i> is a boolean property that tells you 
+        whether or not the video recorder is correctly set up. You should not 
+        <i>Snap()</i> if things are <i>not OK</i>. This may happen for a number 
+        of reasons -- disk full, bad codecs, ... A file called &quot;<i>errors.txt</i>&quot; 
+        is generated when there is an error, and it will tell you which API call 
+        caused the problem.</p>
+      <!-- #EndEditable --></td>
+  </tr>
+  <tr> 
+    <td colspan="2" align="center" valign="top">
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+            <div align="center"><b><b>&lt; <a href="index.htm">Back to start 
+              page </a> &gt;</b></b></div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p align="right"><font size="-1">The <i>Delphi OpenGL Toolkit</i> was written 
+  by <a href="mailto:tom@delphi3d.net">Tom Nuydens</a>.<br>
+  See <a href="index.htm">main page</a> for disclaimer. For updates, visit 
+  <a href="http://www.delphi3d.net">Delphi3D</a>.</font></p>
+</body>
+<!-- #EndTemplate --></html>

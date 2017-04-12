@@ -1,0 +1,191 @@
+<html><!-- #BeginTemplate "/Templates/main.dwt" -->
+<head>
+<!-- #BeginEditable "doctitle" --> 
+<title>The Dot Docs</title>
+<!-- #EndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+<table width="100%" border="0" cellpadding="5">
+  <tr> 
+    <td width="200" align="center" valign="top"> 
+      <div align="center"> 
+        <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#000000"> 
+              <div align="center"><font color="#FFFFFF"><b><font size="+2">The 
+                Dot Docs </font></b></font></div>
+            </td>
+          </tr>
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+              <p align="left"></p>
+              <div align="center"> 
+                <p><a href="index.htm">Introduction</a></p>
+              </div>
+            <div align="center"> 
+                <p><b><font size="-1">[API header files]<br>
+                  </font></b><a href="GLunits.htm">GL.pas, GLu.pas, Glut.pas 
+                  and GLext.pas</a></p>
+                <p><font size="-1"><b>[RC and buffer management]<br>
+                  </b></font><a href="DotWindow.htm">DotWindow.pas<br>
+                  </a><a href="DotOffscreenBuffer.htm">DotOffscreenBuffer.pas<br>
+                  </a><a href="DotRTTBuffer.htm">DotRTTBuffer.pas</a></p>
+                <p><font size="-1"><b>[Shaders]<br>
+                  </b></font><a href="DotShaders.htm">DotShaders.pas</a></p>
+                <p><font size="-1"><b>[Math library]<br>
+                  </b></font><a href="DotMath.htm">DotMath.pas</a></p>
+                <p><b><font size="-1">[3D model loaders]<br>
+                  </font></b><a href="ModelLoaders.htm">ASE.pas, OBJ2.pas, 
+                  MD2.pas, MD3.pas</a></p>
+                <p><font size="-1"><b>[Image loaders]<br>
+                  </b></font><a href="ImageLoaders.htm">TGA2.pas</a></p>
+                <p><font size="-1"><b>[Misc. utilities]<br>
+                  </b></font><a href="DotUtils.htm">DotUtils.pas<br>
+                  </a><a href="DotVideo.htm">DotVideo.pas <br>
+                  </a><a href="NV_parse.htm">NV_parse.pas<br>
+                  </a><a href="Framework.htm">The Dot application framework</a></p>
+                <p><font size="-1"><b>[Powered by]</b></font><br>
+                  <a href="http://www.opengl.org" target="_blank"><img src="ogla_sm.gif" width="84" height="44" border="0" alt="OpenGL.org"></a></p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </td>
+    <td align="left" valign="top"> 
+      <div align="left"></div>
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#000000"> 
+            <div align="center"><font color="#FFFFFF"><b><!-- #BeginEditable "Header" --><font size="+2">The 
+              Delphi OpenGL Toolkit</font><!-- #EndEditable --></b></font></div>
+          </td>
+        </tr>
+      </table>
+      <br>
+      <!-- #BeginEditable "Body" --> 
+      <blockquote> 
+        <p><b>Introduction</b></p>
+      </blockquote>
+      <p align="left">Dot, short for &quot;<i>Delphi OpenGL Toolkit</i>&quot;, 
+        is a utility library designed to speed up OpenGL development. The Dot 
+        can help you manage rendering contexts for your application windows and 
+        for offscreen rendering buffers. It also contains a large library of vector 
+        and matrix math functions, an assortment of image and 3D model loaders, 
+        and more.</p>
+      <p align="left">Use the index on the left to navigate the Dot documentation. 
+        To get started quickly, open the included <a href="Framework.htm">application 
+        framework</a> in Delphi and just start coding! For more details on how 
+        Dot manages your rendering context, read the documentation for <a href="DotWindow.htm">DotWindow.pas</a>.</p>
+      <blockquote> 
+        <p><b>Updates</b></p>
+      </blockquote>
+      <p>Download the latest version of the Dot here:</p>
+      <blockquote> 
+        <p><a href="http://www.delphi3d.net/download/dot.zip">www.delphi3d.net/download/dot.zip</a></p>
+      </blockquote>
+      <p>The documentation you are reading now is both included with the Dot and 
+        mirrored online at:</p>
+      <blockquote> 
+        <p><a href="http://www.delphi3d.net/dot">www.delphi3d.net/dot</a></p>
+      </blockquote>
+      <p>Please do not link to the ZIP file above directly -- link to the documentation 
+        page or to Delphi3D's main page instead.</p>
+      <blockquote> 
+        <p><b>Revision history</b></p>
+      </blockquote>
+      <p align="left"><i>22 June 2005</i>:</p>
+      <ul>
+        <li>Small cosmetic changes to the application framework.</li>
+      </ul>
+      <p align="left"><i>22 February 2005</i>:</p>
+      <ul>
+        <li>Added <i>dotGLAssert()</i> function to <i>DotUtils.pas</i>. Like regular 
+          assertions, but checks for OpenGL errors instead of a user-specified 
+          condition. </li>
+        <li>Updated <i>GLext.pas</i>: added the long overdue GL 1.4, 1.5 and now 
+          also 2.0 entry points, and caught up with all the latest extensions.</li>
+      </ul>
+      <p align="left"><i>17 July 2004</i>:</p>
+      <ul>
+        <li>Added <i>DotShaders.pas</i>, with utility functions for loading <i>ARB_vertex_program</i> 
+          / <i>ARB_fragment_program</i> style shaders and for working with <i>GLSL</i>.</li>
+        <li>Updated <i>GLext.pas</i></li>
+      </ul>
+      <p align="left"><i>29 March 2004</i>:</p>
+      <ul>
+        <li>Small bug fix in <i>DotRTTBuffer.pas</i></li>
+        <li>Updated <i>GLext.pas</i></li>
+      </ul>
+      <p align="left"><i>25 September 2003</i>:</p>
+      <ul>
+        <li>Small bug fixes in <i>DotMath.pas</i>, <i>Glut.pas</i> (thanks to 
+          Igor Karpov) and <i>GLext.pas</i> (thanks to Michal Krcmar).</li>
+      </ul>
+      <p><i>18 August 2003</i>:</p>
+      <ul>
+        <li>Replaced <i>OBJ.pas</i> with a much improved <i>OBJ2.pas</i>, which 
+          offers much faster load times and <i>.MTL</i> material file support.</li>
+        <li>Added <i>DotVideo.pas</i>, which allows you to record AVI videos of 
+          your running Dot applications.</li>
+        <li>Updated <i>GLext.pas.</i></li>
+      </ul>
+      <p align="left"><i>20 May 2003</i>:</p>
+      <ul>
+        <li>Added a .MD3 file loader (Q3A character models)</li>
+        <li>Updated <i>GLext.pas</i></li>
+        <li>Added <i>dotFindFiles()</i> function to <i>DotUtils.pas</i> (wildcard 
+          search for filenames)</li>
+        <li>Included an older version of the framework, without the display mode 
+          dialog at startup. Although the dialog can be very useful for small 
+          games, I found it tends to get in the way for simple demos.</li>
+      </ul>
+      <p align="left"><i>10 Mar 2003</i>: Added a configuration dialog to the 
+        application framework, which allows the user to switch to fullscreen mode, 
+        change the display mode and pixel format, and enable FSAA.</p>
+      <p align="left"><i>7 Mar 2003</i>:</p>
+      <ul>
+        <li>Fixed minor typo in the declaration of <i>TDotVector3</i> and <i>TDotVector4</i> 
+          (thanks to Sebastian Schuberth).</li>
+        <li>Added <i>dotMatInverse3()</i> and <i>dotMatInverse4()</i> functions 
+          to <i>DotMath.pas</i>.</li>
+        <li>Added display mode switching functionality to <i>DotWindow.pas</i>.</li>
+      </ul>
+      <p align="left"><i>27 Feb 2003</i>: First release. Not all included features 
+        have been properly tested yet. If you find any bugs, please <a href="mailto:tom@delphi3d.net">report 
+        them</a>.</p>
+      <blockquote> 
+        <p><b>Disclaimer</b></p>
+      </blockquote>
+      <p align="left">The Dot is completely free for both non-commercial and commercial 
+        use. If you distribute an application based on the Dot, please give credit 
+        by putting a link to <a href="http://www.delphi3d.net">www.delphi3d.net</a> 
+        in an end user-visible place.</p>
+      <p align="left">The Dot is provided without warranty of any kind, so use 
+        it at your own risk.</p>
+      <p align="left">Please do not redistribute the Dot source code. If you want 
+        to share the Dot with others, please provide a link to <a href="http://www.delphi3d.net/dot">www.delphi3d.net/dot</a> 
+        instead, so people can download the latest version of the Dot from there.</p>
+      <!-- #EndEditable --></td>
+  </tr>
+  <tr> 
+    <td colspan="2" align="center" valign="top">
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+            <div align="center"><b><b>&lt; <a href="index.htm">Back to start 
+              page </a> &gt;</b></b></div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p align="right"><font size="-1">The <i>Delphi OpenGL Toolkit</i> was written 
+  by <a href="mailto:tom@delphi3d.net">Tom Nuydens</a>.<br>
+  See <a href="index.htm">main page</a> for disclaimer. For updates, visit 
+  <a href="http://www.delphi3d.net">Delphi3D</a>.</font></p>
+</body>
+<!-- #EndTemplate --></html>

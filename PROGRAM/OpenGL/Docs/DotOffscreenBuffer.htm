@@ -1,0 +1,104 @@
+<html><!-- #BeginTemplate "/Templates/main.dwt" -->
+<head>
+<!-- #BeginEditable "doctitle" --> 
+<title>The Dot Docs</title>
+<!-- #EndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+<table width="100%" border="0" cellpadding="5">
+  <tr> 
+    <td width="200" align="center" valign="top"> 
+      <div align="center"> 
+        <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#000000"> 
+              <div align="center"><font color="#FFFFFF"><b><font size="+2">The 
+                Dot Docs </font></b></font></div>
+            </td>
+          </tr>
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+              <p align="left"></p>
+              <div align="center"> 
+                <p><a href="index.htm">Introduction</a></p>
+              </div>
+            <div align="center"> 
+                <p><b><font size="-1">[API header files]<br>
+                  </font></b><a href="GLunits.htm">GL.pas, GLu.pas, Glut.pas 
+                  and GLext.pas</a></p>
+                <p><font size="-1"><b>[RC and buffer management]<br>
+                  </b></font><a href="DotWindow.htm">DotWindow.pas<br>
+                  </a><a href="DotOffscreenBuffer.htm">DotOffscreenBuffer.pas<br>
+                  </a><a href="DotRTTBuffer.htm">DotRTTBuffer.pas</a></p>
+                <p><font size="-1"><b>[Shaders]<br>
+                  </b></font><a href="DotShaders.htm">DotShaders.pas</a></p>
+                <p><font size="-1"><b>[Math library]<br>
+                  </b></font><a href="DotMath.htm">DotMath.pas</a></p>
+                <p><b><font size="-1">[3D model loaders]<br>
+                  </font></b><a href="ModelLoaders.htm">ASE.pas, OBJ2.pas, 
+                  MD2.pas, MD3.pas</a></p>
+                <p><font size="-1"><b>[Image loaders]<br>
+                  </b></font><a href="ImageLoaders.htm">TGA2.pas</a></p>
+                <p><font size="-1"><b>[Misc. utilities]<br>
+                  </b></font><a href="DotUtils.htm">DotUtils.pas<br>
+                  </a><a href="DotVideo.htm">DotVideo.pas <br>
+                  </a><a href="NV_parse.htm">NV_parse.pas<br>
+                  </a><a href="Framework.htm">The Dot application framework</a></p>
+                <p><font size="-1"><b>[Powered by]</b></font><br>
+                  <a href="http://www.opengl.org" target="_blank"><img src="ogla_sm.gif" width="84" height="44" border="0" alt="OpenGL.org"></a></p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </td>
+    <td align="left" valign="top"> 
+      <div align="left"></div>
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#000000"> 
+            <div align="center"><font color="#FFFFFF"><b><!-- #BeginEditable "Header" --><font size="+2">DotOffscreenBuffer</font><!-- #EndEditable --></b></font></div>
+          </td>
+        </tr>
+      </table>
+      <br>
+      <!-- #BeginEditable "Body" --> 
+      <p align="left"><i>DotOffscreenBuffer.pas</i> contains a <a href="DotWindow.htm"><i>TDotContext</i></a> 
+        descendant class which manages a pbuffer (using <i>WGL_ARB_pbuffer</i>). 
+        The interface of the <i>TDotPbuffer</i> class is a slightly extended version 
+        of <i>TDotContext</i>'s:</p>
+      <pre align="left">  TDotPbuffer = class(TDotContext)
+  public
+    constructor Create(DC: HDC; w, h: Integer);
+    procedure SetPBAttrib(name, value: GLint);
+    property PBAttribs[i: Integer]: TDotPFAttribi;
+    property Width: Integer;
+    property Height: Integer;
+  end;</pre>
+<p align="left">The constructor takes two extra arguments to specify the width 
+  and height of the pbuffer. There is also an extra <i>SetPBAttrib()</i> method 
+  for setting pbuffer attributes. For a list of available attributes, consult 
+  the <i>WGL_ARB_pbuffer</i> specification.</p>
+<!-- #EndEditable --></td>
+  </tr>
+  <tr> 
+    <td colspan="2" align="center" valign="top">
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+            <div align="center"><b><b>&lt; <a href="index.htm">Back to start 
+              page </a> &gt;</b></b></div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p align="right"><font size="-1">The <i>Delphi OpenGL Toolkit</i> was written 
+  by <a href="mailto:tom@delphi3d.net">Tom Nuydens</a>.<br>
+  See <a href="index.htm">main page</a> for disclaimer. For updates, visit 
+  <a href="http://www.delphi3d.net">Delphi3D</a>.</font></p>
+</body>
+<!-- #EndTemplate --></html>

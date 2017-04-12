@@ -1,0 +1,136 @@
+<html><!-- #BeginTemplate "/Templates/main.dwt" -->
+<head>
+<!-- #BeginEditable "doctitle" --> 
+<title>The Dot Docs</title>
+<!-- #EndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+<table width="100%" border="0" cellpadding="5">
+  <tr> 
+    <td width="200" align="center" valign="top"> 
+      <div align="center"> 
+        <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#000000"> 
+              <div align="center"><font color="#FFFFFF"><b><font size="+2">The 
+                Dot Docs </font></b></font></div>
+            </td>
+          </tr>
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+              <p align="left"></p>
+              <div align="center"> 
+                <p><a href="index.htm">Introduction</a></p>
+              </div>
+            <div align="center"> 
+                <p><b><font size="-1">[API header files]<br>
+                  </font></b><a href="GLunits.htm">GL.pas, GLu.pas, Glut.pas 
+                  and GLext.pas</a></p>
+                <p><font size="-1"><b>[RC and buffer management]<br>
+                  </b></font><a href="DotWindow.htm">DotWindow.pas<br>
+                  </a><a href="DotOffscreenBuffer.htm">DotOffscreenBuffer.pas<br>
+                  </a><a href="DotRTTBuffer.htm">DotRTTBuffer.pas</a></p>
+                <p><font size="-1"><b>[Shaders]<br>
+                  </b></font><a href="DotShaders.htm">DotShaders.pas</a></p>
+                <p><font size="-1"><b>[Math library]<br>
+                  </b></font><a href="DotMath.htm">DotMath.pas</a></p>
+                <p><b><font size="-1">[3D model loaders]<br>
+                  </font></b><a href="ModelLoaders.htm">ASE.pas, OBJ2.pas, 
+                  MD2.pas, MD3.pas</a></p>
+                <p><font size="-1"><b>[Image loaders]<br>
+                  </b></font><a href="ImageLoaders.htm">TGA2.pas</a></p>
+                <p><font size="-1"><b>[Misc. utilities]<br>
+                  </b></font><a href="DotUtils.htm">DotUtils.pas<br>
+                  </a><a href="DotVideo.htm">DotVideo.pas</a><br>
+                  <a href="DotNoise.htm">DotNoise.pas</a> <br>
+                  <a href="NV_parse.htm">NV_parse.pas<br>
+                  </a><a href="Framework.htm">The Dot application framework</a></p>
+                <p><font size="-1"><b>[Powered by]</b></font><br>
+                  <a href="http://www.opengl.org" target="_blank"><img src="ogla_sm.gif" width="84" height="44" border="0" alt="OpenGL.org"></a></p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </td>
+    <td align="left" valign="top"> 
+      <div align="left"></div>
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#000000"> 
+            <div align="center"><font color="#FFFFFF"><b><!-- #BeginEditable "Header" --><font size="+2">DotShaders</font><!-- #EndEditable --></b></font></div>
+          </td>
+        </tr>
+      </table>
+      <br>
+      <!-- #BeginEditable "Body" --> 
+      <p align="left"><i>DotShaders.pas</i> contains various utility functions 
+        for working with shaders, based on either <i>ARB_vertex_program</i> / 
+        <i>ARB_fragment_program</i> or the OpenGL Shading Language (GLSL).</p>
+      <blockquote> 
+        <p><b>ARB_vp / ARB_fp</b></p>
+      </blockquote>
+      <pre align="left">  function dotLoadASMShader(target: GLenum; filename: String): GLuint;
+</pre>
+      <p align="left">This function loads an assembly shader from the specified 
+        file and generates a program object for it. The target parameter should 
+        be either <i>GL_VERTEX_PROGRAM_ARB</i> or <i>GL_FRAGMENT_PROGRAM_ARB</i>. 
+        An exception will be raised if the file can't be loaded or the shader 
+        fails to compile.</p>
+      <blockquote> 
+        <p><b>GLSL</b></p>
+      </blockquote>
+      <pre align="left">  function dotGLSLGetInfoLog(s: GLhandleARB): String;</pre>
+      <p align="left">This function returns the info log associated with the given 
+        program object as a Delphi string.</p>
+      <pre align="left">  function dotGLSLLoadShader(const src: String; const stype: GLenum): GLhandleARB;<br>  function dotGLSLLoadShaderFromFile(const filename: String; const stype: GLenum): GLhandleARB;
+  function dotGLSLLoadProgram(const sources: array of const): GLhandleARB;
+  function dotGLSLLoadProgramFromFiles(const filenames: array of const): GLhandleARB;
+</pre>
+      <p align="left">These functions are all used to load shader source and compile 
+        it. The first two load a single shader from memory (by passing the source 
+        code directly to the function) and from disk, respectively. The latter 
+        two load multiple shaders and link them into a single program object, 
+        ready to be used. Again, this pair of functions can either take shader 
+        source directly or load it from disk for you. The argument to the <i>dotGLSLLoadProgram*()</i> 
+        functions is an array of <i>const</i>s that should consist of pairs (i.e. 
+        the number of elements must be even). The first item in each pair should 
+        be a shader compilation target, i.e. either <i>GL_VERTEX_SHADER_ARB</i> 
+        or <i>GL_FRAGMENT_SHADER_ARB</i>. The second item in each pair should 
+        be either the shader source or the filename from which to load the source.</p>
+      <p align="left">The <i>dotGLSLLoadProgram*()</i> functions compile <i>and</i> 
+        link the shaders, so there is no need to link them yourself.</p>
+      <pre align="left">  function dotGLSLLinkPrograms(const programs: array of GLhandleARB): GLhandleARB;</pre>
+      <p align="left">If you decide not to use the <i>dotGLSLLoadProgram*()</i> 
+        functions, you will have to link shaders manually, which you can do using 
+        <i>dotGLSLLinkPrograms()</i>. This function takes an array of shader handles 
+        and returns a program object ready to be used.</p>
+      <pre align="left">  function dotGLSLUniformLocation(const shader: GLhandleARB; const name: String): Integer;</pre>
+      <p align="left">The last of the GLSL utility functions, <i>dotGLSLUniformLocation()</i> 
+        returns the location of the given uniform value. The function takes a 
+        plain Delphi string as an argument and returns the location immediately, 
+        which is more convenient than calling <i>glGetUniformLocationARB()</i> 
+        directly. </p>
+      <!-- #EndEditable --></td>
+  </tr>
+  <tr> 
+    <td colspan="2" align="center" valign="top">
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+            <div align="center"><b><b>&lt; <a href="index.htm">Back to start 
+              page </a> &gt;</b></b></div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p align="right"><font size="-1">The <i>Delphi OpenGL Toolkit</i> was written 
+  by <a href="mailto:tom@delphi3d.net">Tom Nuydens</a>.<br>
+  See <a href="index.htm">main page</a> for disclaimer. For updates, visit 
+  <a href="http://www.delphi3d.net">Delphi3D</a>.</font></p>
+</body>
+<!-- #EndTemplate --></html>

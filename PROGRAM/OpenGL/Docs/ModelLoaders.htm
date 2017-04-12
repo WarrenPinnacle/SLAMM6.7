@@ -1,0 +1,106 @@
+<html><!-- #BeginTemplate "/Templates/main.dwt" -->
+<head>
+<!-- #BeginEditable "doctitle" --> 
+<title>The Dot Docs</title>
+<!-- #EndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+<table width="100%" border="0" cellpadding="5">
+  <tr> 
+    <td width="200" align="center" valign="top"> 
+      <div align="center"> 
+        <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#000000"> 
+              <div align="center"><font color="#FFFFFF"><b><font size="+2">The 
+                Dot Docs </font></b></font></div>
+            </td>
+          </tr>
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+              <p align="left"></p>
+              <div align="center"> 
+                <p><a href="index.htm">Introduction</a></p>
+              </div>
+            <div align="center"> 
+                <p><b><font size="-1">[API header files]<br>
+                  </font></b><a href="GLunits.htm">GL.pas, GLu.pas, Glut.pas 
+                  and GLext.pas</a></p>
+                <p><font size="-1"><b>[RC and buffer management]<br>
+                  </b></font><a href="DotWindow.htm">DotWindow.pas<br>
+                  </a><a href="DotOffscreenBuffer.htm">DotOffscreenBuffer.pas<br>
+                  </a><a href="DotRTTBuffer.htm">DotRTTBuffer.pas</a></p>
+                <p><font size="-1"><b>[Shaders]<br>
+                  </b></font><a href="DotShaders.htm">DotShaders.pas</a></p>
+                <p><font size="-1"><b>[Math library]<br>
+                  </b></font><a href="DotMath.htm">DotMath.pas</a></p>
+                <p><b><font size="-1">[3D model loaders]<br>
+                  </font></b><a href="ModelLoaders.htm">ASE.pas, OBJ2.pas, 
+                  MD2.pas, MD3.pas</a></p>
+                <p><font size="-1"><b>[Image loaders]<br>
+                  </b></font><a href="ImageLoaders.htm">TGA2.pas</a></p>
+                <p><font size="-1"><b>[Misc. utilities]<br>
+                  </b></font><a href="DotUtils.htm">DotUtils.pas<br>
+                  </a><a href="DotVideo.htm">DotVideo.pas <br>
+                  </a><a href="NV_parse.htm">NV_parse.pas<br>
+                  </a><a href="Framework.htm">The Dot application framework</a></p>
+                <p><font size="-1"><b>[Powered by]</b></font><br>
+                  <a href="http://www.opengl.org" target="_blank"><img src="ogla_sm.gif" width="84" height="44" border="0" alt="OpenGL.org"></a></p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </td>
+    <td align="left" valign="top"> 
+      <div align="left"></div>
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#000000"> 
+            <div align="center"><font color="#FFFFFF"><b><!-- #BeginEditable "Header" --><font size="+2">3D 
+              model loaders</font><!-- #EndEditable --></b></font></div>
+          </td>
+        </tr>
+      </table>
+      <br>
+      <!-- #BeginEditable "Body" --> 
+      <p align="left">The Dot contains several units to assist in loading 3D models 
+        into your applications. Currently included are loaders for 3DS Max <i>.ASE</i> 
+        files, WaveFront <i>.OBJ</i> files, Quake2 <i>.MD2</i> files and Quake3 
+        <i>.MD3</i> files.</p>
+<p align="left">The files and classes you can use are:</p>
+      <ul>
+        <li><i>ASE.pas</i> : <i>TASEFile</i></li>
+        <li><i>OBJ.pas</i> : <i>TOBJModel</i></li>
+        <li><i>MD2.pas</i> : <i>TMD2Model</i></li>
+        <li><i>MD3.pas: TMD3Model</i></li>
+      </ul>
+<p>All loaders work by creating an instance of the loader and calling its <i>LoadFromFile()</i> 
+  method. After doing so, you end up with a memory representation of the data 
+  that's as close as possible to its representation on disk (albeit properly structured, 
+  of course). This gives applications complete freedom to do whatever they like 
+  with the data, but it also means that you may need to be somewhat familiar with 
+  the file format in question in order to use the loader.</p>
+<!-- #EndEditable --></td>
+  </tr>
+  <tr> 
+    <td colspan="2" align="center" valign="top">
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+            <div align="center"><b><b>&lt; <a href="index.htm">Back to start 
+              page </a> &gt;</b></b></div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p align="right"><font size="-1">The <i>Delphi OpenGL Toolkit</i> was written 
+  by <a href="mailto:tom@delphi3d.net">Tom Nuydens</a>.<br>
+  See <a href="index.htm">main page</a> for disclaimer. For updates, visit 
+  <a href="http://www.delphi3d.net">Delphi3D</a>.</font></p>
+</body>
+<!-- #EndTemplate --></html>

@@ -1,0 +1,139 @@
+<html><!-- #BeginTemplate "/Templates/main.dwt" -->
+<head>
+<!-- #BeginEditable "doctitle" --> 
+<title>The Dot Docs</title>
+<!-- #EndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+<table width="100%" border="0" cellpadding="5">
+  <tr> 
+    <td width="200" align="center" valign="top"> 
+      <div align="center"> 
+        <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#000000"> 
+              <div align="center"><font color="#FFFFFF"><b><font size="+2">The 
+                Dot Docs </font></b></font></div>
+            </td>
+          </tr>
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+              <p align="left"></p>
+              <div align="center"> 
+                <p><a href="index.htm">Introduction</a></p>
+              </div>
+            <div align="center"> 
+                <p><b><font size="-1">[API header files]<br>
+                  </font></b><a href="GLunits.htm">GL.pas, GLu.pas, Glut.pas 
+                  and GLext.pas</a></p>
+                <p><font size="-1"><b>[RC and buffer management]<br>
+                  </b></font><a href="DotWindow.htm">DotWindow.pas<br>
+                  </a><a href="DotOffscreenBuffer.htm">DotOffscreenBuffer.pas<br>
+                  </a><a href="DotRTTBuffer.htm">DotRTTBuffer.pas</a></p>
+                <p><font size="-1"><b>[Shaders]<br>
+                  </b></font><a href="DotShaders.htm">DotShaders.pas</a></p>
+                <p><font size="-1"><b>[Math library]<br>
+                  </b></font><a href="DotMath.htm">DotMath.pas</a></p>
+                <p><b><font size="-1">[3D model loaders]<br>
+                  </font></b><a href="ModelLoaders.htm">ASE.pas, OBJ2.pas, 
+                  MD2.pas, MD3.pas</a></p>
+                <p><font size="-1"><b>[Image loaders]<br>
+                  </b></font><a href="ImageLoaders.htm">TGA2.pas</a></p>
+                <p><font size="-1"><b>[Misc. utilities]<br>
+                  </b></font><a href="DotUtils.htm">DotUtils.pas<br>
+                  </a><a href="DotVideo.htm">DotVideo.pas <br>
+                  </a><a href="NV_parse.htm">NV_parse.pas<br>
+                  </a><a href="Framework.htm">The Dot application framework</a></p>
+                <p><font size="-1"><b>[Powered by]</b></font><br>
+                  <a href="http://www.opengl.org" target="_blank"><img src="ogla_sm.gif" width="84" height="44" border="0" alt="OpenGL.org"></a></p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </td>
+    <td align="left" valign="top"> 
+      <div align="left"></div>
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#000000"> 
+            <div align="center"><font color="#FFFFFF"><b><!-- #BeginEditable "Header" --><font size="+2">DotUtils</font><!-- #EndEditable --></b></font></div>
+          </td>
+        </tr>
+      </table>
+      <br>
+      <!-- #BeginEditable "Body" --> 
+      <p align="left"><i>DotUtils.pas</i> contains various utility functions that 
+        didn't quite fit into any other file.</p>
+      <blockquote> 
+        <p><b>Timing functions</b></p>
+      </blockquote>
+      <pre align="left">  function dotTime: Int64;
+  function dotTimeSince(start: Int64): Single;
+  procedure dotStartTiming;
+  function dotTimeElapsed: Single;</pre>
+      <p align="left">These functions can be used for timing, e.g. to measure 
+        your application's framerate. They are wrappers around the <i>QueryPerformanceCounter()</i> 
+        API function. The <i>dotTime()</i> function returns the current time, 
+        and <i>dotTimeSince()</i> returns the time elapsed since a given start 
+        time. The elapsed time is measured in seconds. The <i>dotStartTiming()</i> 
+        and <i>dotTimeElapsed()</i> functions are convenience functions that work 
+        like a stopwatch, and for which you don't need to store the starting time 
+        yourself.</p>
+      <blockquote> 
+        <p><b>Debugging functions</b></p>
+      </blockquote>
+      <pre align="left">  function dotWin32ErrorString(code: Integer): String;</pre>
+      <p align="left">This function returns a &quot;friendly&quot; error message 
+        for a given Win32 error code, e.g. as returned by the <i>GetLastError()</i> 
+        API function. You can use this string in error dialogs or when raising 
+        exceptions.</p>
+      <pre align="left">  function dotReadVersionInfo(filename: String): String;</pre>
+      <p align="left">This function reads the version info resource from the given 
+        file and returns the version number as a formatted string. The version 
+        number this function reads back is the one you can set in Delphi under 
+        <i>Project &gt; Options &gt; Version info</i>.</p>
+      <pre align="left">  procedure dotGLAssert(const cause: TObject; const location, msg: String);</pre>
+      <p align="left">This function is similar to the well-known <i>assert()</i> 
+        function, but detects OpenGL errors instead of testing a user-specified 
+        condition. If <i>glGetError()</i> does not return <i>GL_NO_ERROR</i> at 
+        the time <i>dotGLAssert()</i> is called, an error message is displayed 
+        and the application is terminated. The error message contains the OpenGL 
+        error string (e.g. &quot;invalid enumerant&quot;), the class name of the 
+        <i>cause</i> argument, and the <i>location</i> and <i>msg</i> arguments. 
+        Just like the regular <i>assert()</i>, <i>dotGLAssert()</i> does not do 
+        anything if assertions are disabled in your project's compiler settings.</p>
+      <blockquote> 
+        <p><b>File utility functions</b></p>
+      </blockquote>
+      <pre align="left">  function dotFindFiles(const mask: String; attrib: Integer): TStringList;
+</pre>
+      <p align="left">This function returns the names of all files which match 
+        the given filename mask and attributes. For example, passing in <i>&quot;C:\*.bat&quot;</i> 
+        would return all <i>&quot;.bat&quot;</i> files in the root of your hard 
+        drive. The attribute mask should be one of the <i>faAnyFile, faDirectory, 
+        ...</i> constants. Documentation for these can be found with the <i>FindFirst()</i> 
+        RTL function.</p>
+      <!-- #EndEditable --></td>
+  </tr>
+  <tr> 
+    <td colspan="2" align="center" valign="top">
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+            <div align="center"><b><b>&lt; <a href="index.htm">Back to start 
+              page </a> &gt;</b></b></div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p align="right"><font size="-1">The <i>Delphi OpenGL Toolkit</i> was written 
+  by <a href="mailto:tom@delphi3d.net">Tom Nuydens</a>.<br>
+  See <a href="index.htm">main page</a> for disclaimer. For updates, visit 
+  <a href="http://www.delphi3d.net">Delphi3D</a>.</font></p>
+</body>
+<!-- #EndTemplate --></html>

@@ -1,0 +1,180 @@
+<html><!-- #BeginTemplate "/Templates/main.dwt" -->
+<head>
+<!-- #BeginEditable "doctitle" --> 
+<title>The Dot Docs</title>
+<!-- #EndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+<table width="100%" border="0" cellpadding="5">
+  <tr> 
+    <td width="200" align="center" valign="top"> 
+      <div align="center"> 
+        <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#000000"> 
+              <div align="center"><font color="#FFFFFF"><b><font size="+2">The 
+                Dot Docs </font></b></font></div>
+            </td>
+          </tr>
+          <tr> 
+            <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+              <p align="left"></p>
+              <div align="center"> 
+                <p><a href="index.htm">Introduction</a></p>
+              </div>
+            <div align="center"> 
+                <p><b><font size="-1">[API header files]<br>
+                  </font></b><a href="GLunits.htm">GL.pas, GLu.pas, Glut.pas 
+                  and GLext.pas</a></p>
+                <p><font size="-1"><b>[RC and buffer management]<br>
+                  </b></font><a href="DotWindow.htm">DotWindow.pas<br>
+                  </a><a href="DotOffscreenBuffer.htm">DotOffscreenBuffer.pas<br>
+                  </a><a href="DotRTTBuffer.htm">DotRTTBuffer.pas</a></p>
+                <p><font size="-1"><b>[Shaders]<br>
+                  </b></font><a href="DotShaders.htm">DotShaders.pas</a></p>
+                <p><font size="-1"><b>[Math library]<br>
+                  </b></font><a href="DotMath.htm">DotMath.pas</a></p>
+                <p><b><font size="-1">[3D model loaders]<br>
+                  </font></b><a href="ModelLoaders.htm">ASE.pas, OBJ2.pas, 
+                  MD2.pas, MD3.pas</a></p>
+                <p><font size="-1"><b>[Image loaders]<br>
+                  </b></font><a href="ImageLoaders.htm">TGA2.pas</a></p>
+                <p><font size="-1"><b>[Misc. utilities]<br>
+                  </b></font><a href="DotUtils.htm">DotUtils.pas<br>
+                  </a><a href="DotVideo.htm">DotVideo.pas <br>
+                  </a><a href="NV_parse.htm">NV_parse.pas<br>
+                  </a><a href="Framework.htm">The Dot application framework</a></p>
+                <p><font size="-1"><b>[Powered by]</b></font><br>
+                  <a href="http://www.opengl.org" target="_blank"><img src="ogla_sm.gif" width="84" height="44" border="0" alt="OpenGL.org"></a></p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </td>
+    <td align="left" valign="top"> 
+      <div align="left"></div>
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#000000"> 
+            <div align="center"><font color="#FFFFFF"><b><!-- #BeginEditable "Header" --><font size="+2">DotWindow</font><!-- #EndEditable --></b></font></div>
+          </td>
+        </tr>
+      </table>
+      <br>
+      <!-- #BeginEditable "Body" --> 
+      <p align="left"><i>DotWindow.pas</i> contains classes to encapsulate an 
+        OpenGL rendering context and to attach a rendering context to a Delphi 
+        form. Dot manages rendering contexts using the <i>WGL_ARB_pixel_format</i> 
+        extension. Some older video cards may not support this extension, in which 
+        case they won't be able to run applications based on Dot.</p>
+      <blockquote> 
+        <p><b>TDotContext</b></p>
+      </blockquote>
+      <p align="left">The <i>TDotContext</i> class manages a rendering context.</p>
+      <pre align="left">  TDotContext = class
+  public
+    constructor Create(DC: HDC; hasFuncPtrs: Boolean);
+    procedure SetAttrib(name, value: GLint);
+    procedure SetAttrib(name, value: GLfloat);
+    procedure QuickPF(rgb, a, z, stencil: Integer);
+    function InitGL: Boolean;
+    procedure PageFlip;
+    procedure MakeCurrent;
+    property DC: HDC;
+    property RC: HGLRC;
+    property IntAttribs[i: Integer]: TDotPFAttribi;
+    property FloatAttribs[i: Integer]: TDotPFAttribf;
+  end;
+</pre>
+      <p>When you create a new rendering context (RC), you supply the device context 
+        with which the RC is to be associated. You must also specify whether or 
+        not the <i>WGL_ARB_pixel_format</i> entry points have already been loaded 
+        or not. If not, <i>TDotContext</i> will open an invisible temporary window 
+        and create a temporary RC in order to retrieve the function pointers. 
+        Your application will be terminated if <i>WGL_ARB_pixel_format</i> is 
+        not supported!</p>
+      <p>Once your context has been created, you can set its pixel format. This 
+        is done exactly as if you were to use <i>WGL_ARB_pixel_format</i> directly, 
+        namely by specifying named attributes and their values. You can use the 
+        <i>SetAttrib()</i> method to set or modify a pixel format attribute. See 
+        the <i>WGL_ARB_pixel_format</i> specification for the list of available 
+        attributes.</p>
+      <p>For your convenience, the <i>QuickPF()</i> method provides a quick way 
+        to set a standard pixel format. The method takes the desired bit depths 
+        of the color, alpha, depth and stencil buffers as arguments and sets the 
+        appropriate pixel format attributes. The default pixel format is 24 bits 
+        of color and depth, and no destination alpha or stencil, and it is only 
+        necessary to call <i>QuickPF()</i> and/or <i>SetAttrib()</i> if you want 
+        a different pixel format.</p>
+      <p>Once all attributes have been set, you can apply your settings and finalize 
+        your rendering context. To do so, call the <i>InitGL()</i> method. An 
+        exception will be raised at this point if no pixel format can be found 
+        with the attributes you requested. If you like, you can handle this error 
+        by trying to fall back to a simpler pixel format and calling <i>InitGL()</i> 
+        again.</p>
+      <p>Your rendering context is now ready for use, so you may begin to issue 
+        OpenGL calls. If you need to manage more than one RC, you can use the 
+        <i>MakeCurrent()</i> method to switch between them. The <i>PageFlip()</i> 
+        method swaps the front and back buffers of your framebuffer.</p>
+      <blockquote> 
+        <p><b>TDotForm</b></p>
+      </blockquote>
+      <p>The <i>TDotForm</i> class derives from Delphi's standard <i>TForm</i>, 
+        and adds an OpenGL rendering context to it.</p>
+      <pre>  TDotForm = class(TForm)
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    property Context: TDotContext read FContext;
+  end;</pre>
+      <p>To use this class, simply create a form as you always do, and then go 
+        to its source code and change the first line of the class declaration 
+        to derive from <i>TDotForm</i> instead of <i>TForm</i>. You now have access 
+        to a <i>TDotContext</i> object which you can use in your form's <i>OnCreate</i> 
+        event handler to initialize OpenGL for your form.</p>
+      <blockquote> 
+        <p><b>Full screen mode</b></p>
+      </blockquote>
+      <p><i>DotWindow.pas</i> also contains functions to assist in running your 
+        application in full screen mode.</p>
+      <pre>procedure dotEnumerateDisplayModes(cb: TDotDisplayModeEnumCB);
+function dotSetDisplayMode(w, h, bpp, refresh: Cardinal): Boolean;</pre>
+      <p>The first function, <i>dotEnumerateDisplayModes()</i> will produce a 
+        list of all display modes available on the user's system. For each mode, 
+        it invokes a callback function that you supply. The callback has the following 
+        prototype:</p>
+      <pre>function(w, h, bpp, refresh: Cardinal): Boolean;</pre>
+      <p>The arguments passed to the callback, obviously, are the horizontal and 
+        vertical screen resolution, the color depth in bits per pixel, and the 
+        vertical refresh rate.</p>
+      <p>When you have chosen a display mode you want to use, you can use <i>dotSetDisplayMode()</i> 
+        to set it. The arguments are identical to the ones described above for 
+        the enumeration callback. If you pass zero for all arguments, the function 
+        will restore the display settings stored in the user's registry. The function 
+        returns <i>TRUE</i> if it succeeded or <i>FALSE</i> otherwise.</p>
+      <p>After switching to a suitable display resolution, &quot;going full screen&quot; 
+        is simply a matter of opening a borderless and maximized form.</p>
+      <!-- #EndEditable --></td>
+  </tr>
+  <tr> 
+    <td colspan="2" align="center" valign="top">
+      <table width="100%" border="2" cellpadding="5" bordercolor="#000000">
+        <tr> 
+          <td align="center" valign="middle" bgcolor="#FFFFFF"> 
+            <div align="center"><b><b>&lt; <a href="index.htm">Back to start 
+              page </a> &gt;</b></b></div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p align="right"><font size="-1">The <i>Delphi OpenGL Toolkit</i> was written 
+  by <a href="mailto:tom@delphi3d.net">Tom Nuydens</a>.<br>
+  See <a href="index.htm">main page</a> for disclaimer. For updates, visit 
+  <a href="http://www.delphi3d.net">Delphi3D</a>.</font></p>
+</body>
+<!-- #EndTemplate --></html>
