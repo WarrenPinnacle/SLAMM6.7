@@ -14,7 +14,6 @@ We are not currently licensed to distribute this software, but it can be downloa
      http://torry.net/vcl/misc/gis/svoinstall.exe
 Please contact us with any questions about compilation of this unit.
 
-(It is also possible to compile the code without this unit by removing those
-components requiring shapefile integration.)
+
 ------------------------------------------------------------------------------------
 
