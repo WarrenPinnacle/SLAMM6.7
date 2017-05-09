@@ -80,8 +80,7 @@ end;
 
 procedure TSplashForm.Button1Click(Sender: TObject);
 begin
-   ShowMessage('This software download does not include Shape Viewer Objects GIS from Ecological Software Solutions.');
-   ShellExecute(self.WindowHandle,'open','http://warrenpinnacle.com/prof/SLAMM6/SLAMM6.7_Open_Source.zip',nil,nil,SW_SHOWNORMAL);
+   ShellExecute(self.WindowHandle,'open','https://github.com/WarrenPinnacle/SLAMM6.7',nil,nil,SW_SHOWNORMAL);
 end;
 
 procedure TSplashForm.FormClick(Sender: TObject);

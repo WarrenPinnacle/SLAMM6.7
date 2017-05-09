@@ -1,0 +1,60 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{44A6F790-ED65-4004-AA85-6E50FDA9362C}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="slamm6.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="S:\Toolbox\SVO\SVO Delphi\tdbf-xe4\tdbf_xe4_d.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="C:\Programming\TDBF\demo\TDbf_Demo.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="slamm6">
+        <MSBuild Projects="slamm6.dproj"/>
+    </Target>
+    <Target Name="slamm6:Clean">
+        <MSBuild Projects="slamm6.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="slamm6:Make">
+        <MSBuild Projects="slamm6.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="tdbf_xe4_d">
+        <MSBuild Projects="S:\Toolbox\SVO\SVO Delphi\tdbf-xe4\tdbf_xe4_d.dproj"/>
+    </Target>
+    <Target Name="tdbf_xe4_d:Clean">
+        <MSBuild Projects="S:\Toolbox\SVO\SVO Delphi\tdbf-xe4\tdbf_xe4_d.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="tdbf_xe4_d:Make">
+        <MSBuild Projects="S:\Toolbox\SVO\SVO Delphi\tdbf-xe4\tdbf_xe4_d.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="TDbf_Demo">
+        <MSBuild Projects="C:\Programming\TDBF\demo\TDbf_Demo.dproj"/>
+    </Target>
+    <Target Name="TDbf_Demo:Clean">
+        <MSBuild Projects="C:\Programming\TDBF\demo\TDbf_Demo.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TDbf_Demo:Make">
+        <MSBuild Projects="C:\Programming\TDBF\demo\TDbf_Demo.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="slamm6;tdbf_xe4_d;TDbf_Demo"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="slamm6:Clean;tdbf_xe4_d:Clean;TDbf_Demo:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="slamm6:Make;tdbf_xe4_d:Make;TDbf_Demo:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
