@@ -137,7 +137,6 @@ type
     InfDotSizeBox: TComboBox;
     SVOGISReadWrite2: TSVOGISReadWrite;
     SaveDialog1: TSaveDialog;
-    AddElevsButton: TButton;
     OmitT030: TButton;
     LoadSHPButton: TButton;
     ExtractDataShpButton: TButton;
@@ -209,7 +208,6 @@ type
     procedure Button2Click(Sender: TObject);
     procedure ImportShpClick(Sender: TObject);
     procedure CalcInundationClick(Sender: TObject);
-    procedure AddElevsButtonClick(Sender: TObject);
     procedure SVOGISReadWrite1Progress(Sender: TObject; Stage: TProgressStage;
       PercentDone: Byte; RedrawNow: Boolean; const R: TRect; const Msg: string);
     procedure OmitT030Click(Sender: TObject);
@@ -1288,7 +1286,6 @@ Begin
   ImportShp.Visible := (InputBox.ItemIndex > 2 );  {3 or 4}
   CalcInundation.Visible := ((InputBox.ItemIndex = 4) and (SS.NPointInf>0)) or
                             ((InputBox.ItemIndex = 3) and (SS.NRoadInf>0));
-  AddElevsButton.Visible := CalcInundation.Visible;
 //  OmitT030.Visible := CalcInundation.Visible;
 
   Updating := False;
@@ -1909,7 +1906,7 @@ Var MapX,MapY,lngth: Integer;
     RSeg : Integer;
     DirStr, DBFName  : String;
     D2C,RKM  : Double;
-    HasElevs: Boolean;
+    HasSpecificElevs: Boolean;
     PPR: ^PointRec;
     PRR: ^LineRec;
 
@@ -2072,7 +2069,7 @@ Var MapX,MapY,lngth: Integer;
             Begin
               Memo1.Lines.Clear;
               Memo1.Lines.Add('Infrastructure Location');
-              If HasElevs then Memo1.Lines.Add('Elev: '+FloatToStrF(PPR^.Elev,ffgeneral,4,4));
+              If HasSpecificElevs then Memo1.Lines.Add('Elev: '+FloatToStrF(PPR^.Elev,ffgeneral,4,4));
               Memo1.Lines.Add('Col: '+IntToStr(PPR^.Col)+'    Row '+IntToStr(PPR^.Row));
               Memo1.Lines.Add('Input Name: ' +DBFName);
               Memo1.Lines.Add('DBF Index: '+IntToStr(PPR^.ShpIndex));
@@ -2085,8 +2082,8 @@ Var MapX,MapY,lngth: Integer;
             Begin
               Memo1.Lines.Clear;
               Memo1.Lines.Add('Road Location');
-              If HasElevs then Memo1.Lines.Add('Elev: '+FloatToStrF(PRR^.Elev,ffgeneral,4,4));
-//            Memo1.Lines.Add('MapX: '+IntToStr(MapX)+'  MapY '+IntToStr(MapY));
+              If HasSpecificElevs then Memo1.Lines.Add('Elev: '+FloatToStrF(PRR^.Elev,ffgeneral,4,4));
+              Memo1.Lines.Add('MapX: '+IntToStr(MapX)+'  MapY '+IntToStr(MapY));
               Memo1.Lines.Add('Col: '+IntToStr(PRR^.Col)+'    Row '+IntToStr(PRR^.Row));
               Memo1.Lines.Add('Input Name: ' +DBFName);
               Memo1.Lines.Add('DBF Index: '+IntToStr(PRR^.ShpIndex));
@@ -2319,7 +2316,7 @@ Var MapX,MapY,lngth: Integer;
            i2   := PointLocs[X2+(Y2*Image1.Picture.Width)].Loc;
            PPR := @SS.PointInf[Indx].InfPointData[i2];
            DBFName := ExtractFileName(TInfrastructure(SS.PointInf[Indx]).InputFName);
-           HasElevs := SS.PointInf[Indx].HasElevs;
+           HasSpecificElevs := SS.PointInf[Indx].HasSpecificElevs;
          End;
     End;
     {----------------------------------------------------------------------------------------------------}
@@ -2334,7 +2331,7 @@ Var MapX,MapY,lngth: Integer;
            i2   := RoadLocs[X2+(Y2*Image1.Picture.Width)].Loc;
            PRR := @SS.RoadsInf[Indx].RoadData[i2];
            DBFName := ExtractFileName(TInfrastructure(SS.RoadsInf[Indx]).InputFName);
-           HasElevs := SS.RoadsInf[Indx].HasElevs;
+           HasSpecificElevs := SS.RoadsInf[Indx].HasSpecificElevs;
          End;
     End;
     {----------------------------------------------------------------------------------------------------}
@@ -2988,11 +2985,11 @@ var
               OutDPoints := TSVOShapePointArray.Create(2);
 
               DbP.X := (TRI.RoadData[n].X1 * RunScale) + StudyXMin;
-              DbP.Y := -(RunScale*(TRI.RoadData[n].Y1+1-RunRows)) + StudyYMin;
+              DbP.Y := -(RunScale*(TRI.RoadData[n].Y1-RunRows)) + StudyYMin;
               OutDPoints[0] := DbP;
 
               DbP.X := (TRI.RoadData[n].X2 * RunScale) + StudyXMin;
-              DbP.Y := -(RunScale*(TRI.RoadData[n].Y2+1-RunRows)) + StudyYMin;
+              DbP.Y := -(RunScale*(TRI.RoadData[n].Y2-RunRows)) + StudyYMin;
               OutDPoints[1] := DbP;
 
               OutLineShape := TSVOLineShape.Create(OutShapeList,OutDPoints);
@@ -3081,9 +3078,9 @@ begin       {ImportRoadClick}
     Begin
       ReadElevs := MessageDlg('Read Elevations from CSV file?',mtConfirmation,[mbYes,mbNo,mbCancel],0);
       If ReadElevs=mrcancel then Exit;
-      TRI.HasElevs := (ReadElevs=MRYes);
+      TRI.HasSpecificElevs := (ReadElevs=MRYes);
       TRI.ReadRoadCSVFile(OpenDialog1.FileName);
-      If TRI.HasElevs then TRI.Overwrite_Elevs;
+      If TRI.HasSpecificElevs then TRI.Overwrite_Elevs;
       ShowEditItems;
       Exit;
     End;
@@ -3121,7 +3118,7 @@ begin       {ImportRoadClick}
   SetLength(TRI.RoadData,ShapeList.Count);  // minimum size
   TRI.NRoads := 0;
   TRI.InputFName := OpenDialog1.Filename;
-  TRI.HasElevs := False; // don't automatically import elevations
+  TRI.HasSpecificElevs := False; // don't automatically import elevations
 
 
   For i := 0 to ShapeList.Count-1 do    // i lines
@@ -3145,9 +3142,9 @@ begin       {ImportRoadClick}
            With SS.Site do  // transform from projection units to a floating point on the SLAMM scale [0..NRow-1, 0..NCol-1]
              Begin
                StudyX1 := (DataPoints[k].X - StudyXMin) / RunScale;
-               StudyY1 := RunRows-1-(DataPoints[k].Y - StudyYMin) / RunScale;
+               StudyY1 := RunRows-(DataPoints[k].Y - StudyYMin) / RunScale;
                StudyX2 := (DataPoints[k+1].X - StudyXMin) / RunScale;
-               StudyY2 := RunRows-1-(DataPoints[k+1].Y - StudyYMin) / RunScale;
+               StudyY2 := RunRows-(DataPoints[k+1].Y - StudyYMin) / RunScale;
              End;
 
            If ((StudyX1>0) and (StudyY1>0) and (StudyX1<SS.Site.RunCols) and (StudyY1<SS.Site.RunRows)) or
@@ -3177,7 +3174,7 @@ begin       {ImportRoadClick}
                         End;
 
                       //Update RoadData
-                      If ((CellX>0) and (CellY>0) and (CellX<SS.Site.RunCols) and (CellY<SS.Site.RunRows)) then
+                      If ((CellX>=0) and (CellY>=0) and (CellX<SS.Site.RunCols) and (CellY<SS.Site.RunRows)) then
                       If CellClass(CellX,CellY) <> -99 then
                         begin
                           inc(TRI.NRoads);
@@ -3218,47 +3215,6 @@ begin       {ImportRoadClick}
   If TRI.NRoads>0 then OutputSegments;
 end;
 
-procedure TGridForm.AddElevsButtonClick(Sender: TObject);
-var
-  j, i, ER, EC: integer;
-  ProcCell: CompressedCell;
-
-begin
- If InputBox.ItemIndex = 4 then
-  Begin
-    If SS.NPointInf>0 then
-      for j:=0 to SS.NPointInf-1 do
-       If (PointIndex = -1) or (j=PointIndex) then
-        With SS.PointInf[j] do
-          Begin
-            for i := 0 to NPoints-1 do
-             begin
-               ER := InfPointData[i].Row;
-               EC := InfPointData[i].Col;
-               SS.RetA(ER,EC,ProcCell);
-
-               InfPointData[i].Elev := GetMinElev(@ProcCell,ER,EC)
-             end;
-            HasElevs := True;
-          End
-  End
- else // Roads elevs
-  If SS.NRoadInf>0 then
-    for j:=0 to SS.NRoadInf-1 do
-     If (RoadIndex = -1) or (j=RoadIndex) then
-      With SS.RoadsInf[j] do
-        Begin
-          for i := 0 to NRoads-1 do
-           begin
-             ER := RoadData[i].Row;
-             EC := RoadData[i].Col;
-             SS.RetA(ER,EC,ProcCell);
-
-             RoadData[i].Elev := GetMinElev(@ProcCell,ER,EC)
-           end;
-          HasElevs := True;
-        End;
-end;
 
 {-----------------------------------------------------------------------}{-----------------------------------------------------------------------}
 
@@ -3359,7 +3315,7 @@ var
               ProgForm.Update2Gages(Trunc(100*((n+1)/(TPI.NPoints))),0);
 
               OutPoint.X := (TPI.InfPointData[n].X * RunScale) + StudyXMin;
-              OutPoint.Y := -(RunScale*(TPI.InfPointData[n].Y+1-RunRows)) + StudyYMin;
+              OutPoint.Y := -(RunScale*(TPI.InfPointData[n].Y-RunRows)) + StudyYMin;
 
               OutPointShape := TSVOPointShape.Create(OutShapeList);
               OutPointShape.SetShape(OutPoint);
@@ -3475,10 +3431,10 @@ begin
       With SS.Site do
         Begin                // transform from projection units to the SLAMM scale [0..NRow-1, 0..NCol-1]
           StudyX := Trunc((PointShape.Data.X - StudyXMin) / RunScale);
-          StudyY := RunRows-1-Trunc((PointShape.Data.Y - StudyYMin) / RunScale);
+          StudyY := Trunc(RunRows-((PointShape.Data.Y - StudyYMin) / RunScale));
 
           FloatX := (PointShape.Data.X - StudyXMin) / RunScale;
-          FloatY := RunRows-1-((PointShape.Data.Y - StudyYMin) / RunScale);
+          FloatY := RunRows-((PointShape.Data.Y - StudyYMin) / RunScale);
         End;
 
       If (StudyX>0) and (StudyY>0) and (StudyX<SS.Site.RunCols) and (StudyY<SS.Site.RunRows) then
@@ -3952,7 +3908,7 @@ begin
       SS.TStepIter := 0;
       With SS.RoadsInf[InfIndex] do
        Begin
-        // If HasElevs then Overwrite_Elevs;
+        // If HasSpecificElevs then Overwrite_Elevs;
         CalcAllRoadsInundation;
         RunPanel.Hide;
         RoadIndex := EditBox.ItemIndex;
@@ -5413,7 +5369,7 @@ var
   N_GISYears: Integer;
   CellPolys: Array of CellPolyRec;
   FlatIndex: LongInt;
-  Perimeter, ShapeX, ShapeY, MWid, WetlandArea: Double;
+  NonFrag, EdgeDens, Perimeter, ShapeX, ShapeY, MWid, WetlandArea: Double;
   DMTPolyShape: TSVOPolygonShape;
   SIF: TSLAMMInputFile;
   ReadOK: Boolean;
@@ -5600,15 +5556,20 @@ begin
        Perimeter := WetlandCells[i,shp,TotNWetland-1]*SS.Site.RunScale; // Marsh Perimeter in meters
                                {count}                          {m}
        WetlandArea := 0;
-       z := 8;  WetlandArea := WetlandArea + WetlandCells[i,shp,z]*Sqr(SS.Site.RunScale);
-       z := 9;  WetlandArea := WetlandArea + WetlandCells[i,shp,z]*Sqr(SS.Site.RunScale);
-       z := 20; WetlandArea := WetlandArea + WetlandCells[i,shp,z]*Sqr(SS.Site.RunScale);
-       z := 6;  WetlandArea := WetlandArea + WetlandCells[i,shp,z]*Sqr(SS.Site.RunScale);
-                                 {ha}              {count}                    {m2}
+       z := 8;  WetlandArea := WetlandArea + WetlandCells[i,shp,z]*Sqr(SS.Site.RunScale);  //r.f.m
+       z := 9;  WetlandArea := WetlandArea + WetlandCells[i,shp,z]*Sqr(SS.Site.RunScale);  //mangrove
+       z := 20; WetlandArea := WetlandArea + WetlandCells[i,shp,z]*Sqr(SS.Site.RunScale);  //i.f.m
+       z := 6;  WetlandArea := WetlandArea + WetlandCells[i,shp,z]*Sqr(SS.Site.RunScale);  //t.fresh
+       z := 7;  WetlandArea := WetlandArea + WetlandCells[i,shp,z]*Sqr(SS.Site.RunScale);  //transitional
+                                 {m2}              {count}                    {m2}
 
        If WetlandArea < Tiny then Begin Perimeter := 1; WetlandArea := 1; End; // maximum result of 0.8 m/m2 with 5 meter cell size (4/cell size)
-       Write(Outfile,',',floattostrf(Perimeter / WetlandArea,ffgeneral,8,4));  // Edge Density
-                                       {m}       {m2}
+       EdgeDens := Perimeter / WetlandArea;
+                      {m}        {m2}
+       NonFrag  := WetlandArea / 10000 * (4/5-EdgeDens)/(4/5-2*SQRT(PI/WetlandArea));
+                      {m2}      {m2/ha}   { unitless normalized non frag density }
+       Write(Outfile,',',floattostrf(NonFrag,ffgeneral,8,4));  // Non Fragmented Density (edge density in ha)
+                                       {ha}
        If WriteLength then
         Begin
           If MarshLengths[shp] < tiny then MWid := 0 else

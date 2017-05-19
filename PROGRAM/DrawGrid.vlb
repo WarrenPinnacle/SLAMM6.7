@@ -26,7 +26,7 @@ Coordinates=586,122,63,51
 Coordinates=776,530,68,33
 
 []
-Coordinates=862,530,52,33
+Coordinates=0,0,94,51
 Visible=True
 
 [AddEst]
@@ -323,9 +323,6 @@ Visible=True
 
 [ExtractDataShpButton]
 Coordinates=220,1,124,51
-
-[AddElevsButton]
-Coordinates=0,0,94,51
 
 [LoadSHPButton]
 Coordinates=687,338,93,51

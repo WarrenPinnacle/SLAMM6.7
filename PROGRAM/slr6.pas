@@ -653,7 +653,7 @@ var  Cl: CompressedCell;
        // Get cell elevation
        CellElev := getMinElev(Cl);        //Minimum Elevation
        if ConnectMinElev=0 then
-        CellElev := CellElev + (Site.RunScale*0.5)*Cl.TanSlope; //Use average elevation
+        CellElev := CellElev + (Site.RunScale*0.5)*Cl.TanSlope; //Use average elevation in MTL
 
        // Check if cell elevation is below the reference elevation
        if ElevType=-1 then
@@ -908,7 +908,7 @@ Begin
      // Get cell elevation
      CellElev := getMinElev(@Cl);        //Minimum Elevation
      if ConnectMinElev=0 then
-       CellElev := CellElev + (Site.RunScale*0.5)*Cl.TanSlope; //Use average elevation
+       CellElev := CellElev + (Site.RunScale*0.5)*Cl.TanSlope; //Use average elevation in MTL
 
     If (CellElev < 20) and (not IsOpenWater(@Cl)) // throw out open water, no data (elev 999), and elevations above 20 m
      Then
@@ -925,18 +925,18 @@ Begin
          If (SLR<1e-6) or (not SS_Raster_SLR[Ri])
             then
               Begin
-                StormElev := WordToFloat(SSRasters[Ri,1,FlatArrIndex]);
-                If StormElev>-9.99 then StormElev := StormElev + SLR  // Add SLR to T-Zero Storm Surge unless no-data
+                StormElev := WordToFloat(SSRasters[Ri,1,FlatArrIndex]);  // MTL t0 datum
               End
             else
               Begin
-                StormElev := -10;  // default if both cells have no-data
+                StormElev := -10;  // default if both cells have no-data -- no effect
                 Val1 := WordToFloat(SSRasters[Ri,1,FlatArrIndex]);
                 Val2 := WordToFloat(SSRasters[Ri,2,FlatArrIndex]);
-                If (Val2<-9.99) and (Val1>-9.99) then StormElev := Val1+SLR-SS_SLR[Ri,1];  // if one map has no data then add or subtract SLR difference to the other (assumed to be the higher SLR)
-                If (Val1<-9.99) and (Val2>-9.99) then StormElev := Val2+SLR-SS_SLR[Ri,2];  // if one map has no data then add or subtract SLR difference to the other (assumed to be the higher SLR)
+                If (Val2<-9.99) and (Val1>-9.99) then StormElev := Val1-SS_SLR[Ri,1];  // if one map has no data then use other data, convert to MTL T0 Datum
+                If (Val1<-9.99) and (Val2>-9.99) then StormElev := Val2-SS_SLR[Ri,2];  // if one map has no data then use other data, convert to MTL T0 Datum
                 If (Val1>-9.99) and (Val2>-9.99) then
-                  StormElev := LinearInterpolate(Val1,Val2,SS_SLR[Ri,1],SS_SLR[Ri,2],SLR,True); // interpolate or extrapolate from SLR data
+                    StormElev := LinearInterpolate(Val1,Val2,SS_SLR[Ri,1],SS_SLR[Ri,2],SLR,True)-SLR; // interpolate or extrapolate from SLR data, then convert to MTL T0 Datum
+                 {mtl t0 datum}                   {mtl datum}                             {convert to mtl t0 datum}
               End;
 
          If CellElev<StormElev {and not open water}   then
@@ -1390,7 +1390,6 @@ Var NewDikFName, DikFExt: String;
          SLRStr := IntToStr(SLR_Inch);
          If Length(SLRStr) = 1 then SLRStr := '0'+SLRStr;
          NewFileN := BaseFileN + SLRStr + '_'+ ReturnStr+FileExt;
-         If FileExists(NewFileN) then
        Until (j=2) or FileExists(NewFileN);
 
        If FileExists(NewFileN)
@@ -1514,7 +1513,7 @@ Begin
         If SFExists then Storm_Num := GetNextNumber(StormFile, ER, EC);
 
         RetA(ER,EC,Cl);
-        If (Storm_Num > -9.99) and (Cl.MTLminusNAVD > -9998) then Storm_Num := Storm_Num - Cl.MTLminusNAVD;
+        If (Storm_Num > -9.99) and (Cl.MTLminusNAVD > -9998) then Storm_Num := Storm_Num - Cl.MTLminusNAVD;      // convert to MTL basis
         SSRasters[RIi,SLRi,(Site.ReadCols*ER)+EC] := FloatToWord(Storm_Num);
       End;
 
@@ -2072,13 +2071,13 @@ Begin  {MakeDataFile}
 
          If SFExists1 then if Storm_Num1 > -9.99 then
            Begin
-             Storm_Num1 := Storm_Num1 - MTL_Correction;
+             Storm_Num1 := Storm_Num1 - MTL_Correction; // convert to MTL Basis
              SSRasters[1,1,FlatArrIndex] :=  FloatToWord(Storm_Num1);
            End;
 
          If SFExists2 then if Storm_Num2 > -9.99 then
            Begin
-             If Storm_Num2 > -9.99 then Storm_Num2 := Storm_Num2 - MTL_Correction;
+             If Storm_Num2 > -9.99 then Storm_Num2 := Storm_Num2 - MTL_Correction; // convert to MTL Basis
              SSRasters[2,1,FlatArrIndex] :=  FloatToWord(Storm_Num2);
            End;
 
@@ -4407,8 +4406,8 @@ Begin
      + ') is Greater than Executable Version Number ('+ FloatToStrF(VersionNum    ,ffgeneral,6,6)
      + ').  Please update your version of SLAMM.');
 
-  If ReadVersionNum < 6.955 then
-    Raise ESLAMMError.Create('Cannot yet read SLAMM 6.6 files or before (Pre California Version: file-version numbers prior to 6.96.)');
+  If ReadVersionNum < 6.965 then
+    Raise ESLAMMError.Create('Cannot yet read SLAMM 6.6 files or before (Pre California Version: file-version numbers prior to 6.97.)');
 
   Init_ElevStats := False;
   If ReadVersionNum > 6.965 then TSRead('Init_ElevStats',Init_ElevStats);

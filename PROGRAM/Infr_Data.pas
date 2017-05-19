@@ -73,7 +73,7 @@ type
   TInfrastructure = class
     InputFName : string;            // filename of CSV input or shapefile
     IDName     : String;            // user given name
-    HasElevs : Boolean;              // update road elevations using data in *.shp or *.csv
+    HasSpecificElevs : Boolean;     // whether to update elevations using data in *.shp or *.csv
 
     {  ---- no save below ---- }
     PSS: Pointer;                   // pointer back to TSLAMM_Simulation                                // nosave
@@ -179,6 +179,9 @@ var
   End;
 
 begin
+  MessageDlg('CSV File import Disabled',mterror,[mbok],0);
+  Exit;
+
   SS := PSS;
 
   Assign(TFile,FN);
@@ -273,7 +276,7 @@ end;
 constructor TPointInfrastructure.Create(SS: Pointer);
 begin
   IDName := 'New Infr. Layer';
-  HasElevs := False;
+  HasSpecificElevs := False;
   infpointdata := nil;
   inherited Create(SS);
   Fields:= nil;
@@ -310,6 +313,10 @@ begin
    With InfPointData[i] do
     Begin
       TSRead('Row',Row);
+      If ReadVersionNum < 6.985 then
+        Begin
+          Inc(Row);  //5/15/2017 fix horizontal offset problem
+        End;
       TSRead('Col',Col);
       TSRead('ShpIndex',ShpIndex);
       TSRead('Elev',Elev);
@@ -420,9 +427,9 @@ begin
   TSRead('InputFName',InputFName,ReadVersionNum);
   TSRead('IDName',IDName,ReadVersionNum);
 
-  HasElevs := False;
- If ReadVersionNum > 6.895 then TSRead('HasElevs',HasElevs)
-                           else  HasElevs := True;
+  HasSpecificElevs := False;
+ If ReadVersionNum > 6.895 then TSRead('HasElevs',HasSpecificElevs)
+                           else  HasSpecificElevs := True;
 
   SetLength(ProjRunStrArr,1);  // minimum array size
 end;
@@ -431,7 +438,7 @@ procedure TInfrastructure.Save(var TS: TStream);
 begin
   TSWrite('InputFName',InputFName);
   TSWrite('IDName',IDName);
-  TSWrite('HasElevs',HasElevs)
+  TSWrite('HasElevs',HasSpecificElevs)
 end;
 
 function TRoadInfrastructure.CheckValid: Boolean;
@@ -647,6 +654,11 @@ begin
     Begin
        ProgForm.Update2Gages(Trunc(100*i/(NRoads-1)),0);
       TSRead('Row',Row);
+      If ReadVersionNum < 6.955 then
+        Begin
+          Inc(Row);  //5/15/2017 fix horizontal offset problem
+        End;
+
       TSRead('Col',Col);
       TSRead('ShpIndex',ShpIndex);
       TSRead('RoadClass',RoadClass);
@@ -691,9 +703,15 @@ var   CC: Integer;
       i: Integer;
       SS: TSLAMM_Simulation;
 Begin
+  If HasSpecificElevs then
+    MessageDlg('Overwriting elevations disabled',mterror,[mbok],0);
+
+  Exit;
+
+(*
   SS := PSS;
 
-  If HasElevs then
+  If HasSpecificElevs then
    For i := 0 to NRoads-1 do
     With RoadData[i] do
       Begin
@@ -703,7 +721,7 @@ Begin
         if Elev > -999 then   //handle no-data
             SetCatElev(@ReadCell,CC, Elev-NAVDCorr); //Set elevation -- Road Inputs required in NAVD88 format Correct to MTL basis
         SS.SetA(Row,Col,ReadCell);            // Set the cell value
-      End;
+      End;           *)
 end;
 
 Procedure TRoadInfrastructure.UpdateRoadSums(CountProj: integer; var RoadOutSum: Array of RoadArray; NOutSites: Integer);
@@ -857,7 +875,7 @@ Begin
       Exit;
     End;
 
-  WriteElevs := FirstWrite and HasElevs;
+  WriteElevs := False; // FirstWrite and HasSpecificElevs;
 
   DBF1 := TDBF.Create(nil);
   DBF1.TableName := OutputFName;

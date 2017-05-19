@@ -8,9 +8,9 @@ INTERFACE
 
 USES   SysUtils, Windows, Messages, Classes, Graphics, Math, Dialogs;
 
-Const  VersionNum: Double = 6.98;   //used for file reading and writing   6.975 threshold
+Const  VersionNum: Double = 6.99;   //used for file reading and writing   6.985 threshold
        VersStr  = '6.7.0 beta';
-       BuildStr = '6.7.0236';
+       BuildStr = '6.7.0237';
 
 Const  Feet_Per_Meter = 3.28084;
 
