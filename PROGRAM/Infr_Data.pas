@@ -20,7 +20,7 @@ type
     RowMin, RowMax, ColMin, ColMax : integer;
   end;
 
-   //--------------------------------------------
+//--------------------------------------------
 //Definitions for line data
 //--------------------------------------------
 type
@@ -313,10 +313,6 @@ begin
    With InfPointData[i] do
     Begin
       TSRead('Row',Row);
-      If ReadVersionNum < 6.985 then
-        Begin
-          Inc(Row);  //5/15/2017 fix horizontal offset problem
-        End;
       TSRead('Col',Col);
       TSRead('ShpIndex',ShpIndex);
       TSRead('Elev',Elev);
