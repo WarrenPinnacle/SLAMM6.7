@@ -2069,13 +2069,13 @@ Begin  {MakeDataFile}
          if (not ClassicDike) and (ReadCell.ElevDikes)  //elevation will be set to dike height.
             then Elev_Number := DIK_Number - MTL_Correction;  //Dike elevations provided with respect to NAVD88 and adjusted to MTL
 
-         If SFExists1 then if Storm_Num1 > -9.99 then
+         If SFExists1 then if (Storm_Num1 > -9.99) and (not CountOnly) then
            Begin
              Storm_Num1 := Storm_Num1 - MTL_Correction; // convert to MTL Basis
              SSRasters[1,1,FlatArrIndex] :=  FloatToWord(Storm_Num1);
            End;
 
-         If SFExists2 then if Storm_Num2 > -9.99 then
+         If SFExists2 then if (Storm_Num2 > -9.99) and (not CountOnly) then
            Begin
              If Storm_Num2 > -9.99 then Storm_Num2 := Storm_Num2 - MTL_Correction; // convert to MTL Basis
              SSRasters[2,1,FlatArrIndex] :=  FloatToWord(Storm_Num2);
