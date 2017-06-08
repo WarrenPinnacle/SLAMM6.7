@@ -4413,7 +4413,7 @@ Begin
   If ReadVersionNum > 6.965 then TSRead('Init_ElevStats',Init_ElevStats);
 
   NElevStats := 0;
-  if ReadVersionNum > 6.965 then TS.Read(NElevStats,Sizeof(NElevStats));
+  if ReadVersionNum > 6.965 then TSRead('NElevStats',NElevStats);
   Categories := TCategories.Load(Self,ReadVersionNum,TS);
 
   TSRead('SimName',SimName,ReadVersionNum);

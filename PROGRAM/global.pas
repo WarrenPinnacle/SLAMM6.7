@@ -10,7 +10,7 @@ USES   SysUtils, Windows, Messages, Classes, Graphics, Math, Dialogs;
 
 Const  VersionNum: Double = 6.99;   //used for file reading and writing   6.985 threshold
        VersStr  = '6.7.0 beta';
-       BuildStr = '6.7.0237';
+       BuildStr = '6.7.0238';
 
 Const  Feet_Per_Meter = 3.28084;
 
@@ -610,6 +610,7 @@ Implementation
        then Try
               i := StrToInt(CheckName(nm));
             Except
+              MessageDlg(Exception(ExceptObject).Message,mterror,[mbOK],0);
               Raise ESLAMMError.Create('Integer Conversion Error, Line '+IntToStr(GlobalLN));
             End
        else GlobalTS.Read(i,Sizeof(i));
@@ -1408,9 +1409,9 @@ Destructor TSite.Destroy;
 Var i: Integer;
 Begin
   For i := 0 to NSubSites-1 do
-    SubSites[i].Destroy;
+    If SubSites[i]<>nil then SubSites[i].Destroy;
 
-  GlobalSite.Destroy;
+  If GlobalSite<>nil then GlobalSite.Destroy;
 
   SubSites := nil;
   For i := 0 to NOutputSites-1 do
