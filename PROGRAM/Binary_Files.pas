@@ -157,11 +157,11 @@ begin
         {------------------------------------}
         ReadLn(TxtFile,ReadStr);
         Delete(ReadStr,Pos('xllcorner',LowerCase(ReadStr)),9);
-        fXLLCorner:=Round(StrToFloat(ReadStr));
+        fXLLCorner:=(StrToFloat(ReadStr));
         {------------------------------------}
         ReadLn(TxtFile,ReadStr);
         Delete(ReadStr,Pos('yllcorner',LowerCase(ReadStr)),9);
-        fYLLCorner:=Round(StrToFloat(ReadStr));
+        fYLLCorner:=(StrToFloat(ReadStr));
         {------------------------------------}
         ReadLn(TxtFile,ReadStr);
         Delete(ReadStr,Pos('cellsize',LowerCase(ReadStr)),8);
