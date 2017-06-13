@@ -282,8 +282,8 @@ Var NRows: Double;
            Begin
              if PSS.Site.ReadRows <> SIF.fRow then LabelStr := 'File Num Rows is different.'
                else if PSS.Site.ReadCols <> SIF.fCol then LabelStr := 'File Num Cols. is different.'
-               else if PSS.Site.LLXCorner <> SIF.fXLLCorner then LabelStr := 'File Lower Left Corner X is different.'
-               else if PSS.Site.LLYCorner <> SIF.fYLLCorner then LabelStr := 'File Lower Left Corner Y is different.'
+               else if Round(PSS.Site.LLXCorner) <> Round(SIF.fXLLCorner) then LabelStr := 'File Lower Left Corner X is different.'
+               else if Round(PSS.Site.LLYCorner) <> Round(SIF.fYLLCorner) then LabelStr := 'File Lower Left Corner Y is different.'
                else if PSS.Site.ReadScale     <> SIF.fCellSize then LabelStr := 'File Cell Size is different.';
              Result := LabelStr = '';
            End;
