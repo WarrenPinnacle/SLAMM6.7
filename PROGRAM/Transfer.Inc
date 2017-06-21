@@ -900,13 +900,7 @@ Procedure FetchThreshold;
 
 BEGIN
  With InundContext do
-  Begin
-   Erosion := None;
-   IF (AdjMaxFetch > 1)  AND (AdjMaxFetch <= 3) {km}  THEN Erosion := Little;
-   IF (AdjMaxFetch > 3)  AND (AdjMaxFetch <= 9)  THEN Erosion := Moderate;
-   IF (AdjMaxFetch > 9)  AND (AdjMaxFetch <= 20) THEN Erosion := Heavy;
-   IF (AdjMaxFetch > 20) THEN Erosion := Severe;
-  End;
+   Erosion2 := AdjMaxFetch;  // 6/21/2017  no more "Erosion" enumerated type, replacing with relevant fetch in km to improve code readability
 END; {Erosion}
 
 {********************************************}
@@ -1044,12 +1038,21 @@ Begin
                       SetCatElev(Cell,Categories.GetCat(Cat).Erodeto,0);  {Set the elevation of the category being transferred to to MTL}
                     End
 
-                else if (EModel = EMarsh) or (EModel = ESwamp) then with InundContext do
-                  Begin   //classic marsh and swamp erosion
-                    If (Erosion > Moderate) {9km fetch} AND (AdjOcean OR AdjWater) Then // 4/17/2009
+                else if (EModel = EMarsh) then with InundContext do
+                  Begin   //classic marsh erosion, but with editable fetch limit 6/21/2017
+                    If (Erosion2 >= Subsite.MarshErodeFetch ) {9km fetch} AND (AdjOcean OR AdjWater) Then
                       Begin
-                        if (EModel = EMarsh) then ERate := SubSite.MarshErosion
-                                             else ERate := SubSite.SwampErosion;
+                        ERate := SubSite.MarshErosion;
+                        FracLost[Cat] := Frac_To_Erode(Cell,ERate,Cat);
+                        Convert(Cell,Cat,Categories.GetCat(Cat).Erodeto,-99);
+                        SetCatElev(Cell,Categories.GetCat(Cat).Erodeto,0);  {Set the elevation of the category being transferred to to MTL}
+                      End;
+                  End
+                else if (EModel = ESwamp) then with InundContext do
+                  Begin   //classic swamp erosion
+                    If (Erosion2 >= 9) {9km fetch} AND (AdjOcean OR AdjWater) Then // 4/17/2009    9km fetch for swamp erosion
+                      Begin
+                        ERate := SubSite.SwampErosion;
                         FracLost[Cat] := Frac_To_Erode(Cell,ERate,Cat);
                         Convert(Cell,Cat,Categories.GetCat(Cat).Erodeto,-99);
                         SetCatElev(Cell,Categories.GetCat(Cat).Erodeto,0);  {Set the elevation of the category being transferred to to MTL}

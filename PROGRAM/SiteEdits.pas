@@ -16,7 +16,7 @@ uses
 //                     3. Add Labeling and Data output to UpdateTSGrid;
 //                     4. Update numbering in UpdateTSGrid
 
-Const NUMRowsOrig     = 29;  // original parameters
+Const NUMRowsOrig     = 30;  // original parameters
       NUMRowsLag      = 6;   // lagoonal and wave erosion parameters
       NUMRowsAccr     = 8;   // accretion model rows
 
@@ -148,36 +148,38 @@ begin
         8: GTideRange := StrToFloat(V);
         9: SaltElev := StrToFloat(V);
         10: MarshErosion := StrToFloat(V);
-        11: SwampErosion := StrToFloat(V);
-        12: TFlatErosion := StrToFloat(V);
-        13: FixedRegFloodAccr  := StrToFloat(V);         // Note edits here also need to be made in UncertDefn
-        14: FixedIrregFloodAccr  := StrToFloat(V);
-        15: FixedTideFreshAccr  := StrToFloat(V);
+        11: MarshErodeFetch := StrToFloat(V);
 
-        16: InlandFreshAccr := StrToFloat(V);
-        17: MangroveAccr := StrToFloat(V);
-        18: TSwampAccr := StrToFloat(V);
-        19: SwampAccr := StrToFloat(V);
-        20: Fixed_TF_Beach_Sed := StrToFloat(V);
-        21: IFM2RFM_Collapse := StrToFloat(V);  // 1/11/2016
-        22: RFM2TF_Collapse := StrToFloat(V);
+        12: SwampErosion := StrToFloat(V);
+        13: TFlatErosion := StrToFloat(V);
+        14: FixedRegFloodAccr  := StrToFloat(V);         // Note edits here also need to be made in UncertDefn
+        15: FixedIrregFloodAccr  := StrToFloat(V);
+        16: FixedTideFreshAccr  := StrToFloat(V);
 
-        23: Use_Wave_Erosion := TranslateBool;
-        24: Use_Preprocessor := TranslateBool;
+        17: InlandFreshAccr := StrToFloat(V);
+        18: MangroveAccr := StrToFloat(V);
+        19: TSwampAccr := StrToFloat(V);
+        20: SwampAccr := StrToFloat(V);
+        21: Fixed_TF_Beach_Sed := StrToFloat(V);
+        22: IFM2RFM_Collapse := StrToFloat(V);  // 1/11/2016
+        23: RFM2TF_Collapse := StrToFloat(V);
 
-        25: InundElev[0] := StrToFloat(V);  // 30D Inundation  //12/5/2013 Marco
-        26: InundElev[1] := StrToFloat(V);  // 60D Inundation
-        27: InundElev[2] := StrToFloat(V);  // 90D Inundation
-        28: InundElev[3] := StrToFloat(V);  // Storm Surge Test 1
-        29: InundElev[4] := StrToFloat(V);  // Storm Surge Test 2
+        24: Use_Wave_Erosion := TranslateBool;
+        25: Use_Preprocessor := TranslateBool;
+
+        26: InundElev[0] := StrToFloat(V);  // 30D Inundation  //12/5/2013 Marco
+        27: InundElev[1] := StrToFloat(V);  // 60D Inundation
+        28: InundElev[2] := StrToFloat(V);  // 90D Inundation
+        29: InundElev[3] := StrToFloat(V);  // Storm Surge Test 1
+        30: InundElev[4] := StrToFloat(V);  // Storm Surge Test 2
       End; {Case}
 
     If ShowWindEdits.Checked
      then Case R of
-      30: WE_Alpha := StrToFloat(V);
-      31: WE_Has_Bathymetry := TranslateBool;
-      32: WE_Avg_Shallow_Depth := StrToFloat(V);
-      33: Begin
+      31: WE_Alpha := StrToFloat(V);
+      32: WE_Has_Bathymetry := TranslateBool;
+      33: WE_Avg_Shallow_Depth := StrToFloat(V);
+      34: Begin
             V := Lowercase(V);
             If v='' then exit;
             Case V[1] of
@@ -188,8 +190,8 @@ begin
               'd': LagoonType := LtDrainage;
             end; {case}
           End;
-      34: ZBeachCrest := StrToFloat(V);
-      35: LBeta := StrToFloat(V);
+      35: ZBeachCrest := StrToFloat(V);
+      36: LBeta := StrToFloat(V);
      End; {Case}
 
     If (R>NUMRowsOrig+NumRowsLag) or ((R>NUMRowsOrig) and Not ShowWindEdits.Checked) then
@@ -421,30 +423,32 @@ Var nRows, i,j: Integer;
         Rows[8].Add((FloatToStrf(GTideRange,ffgeneral,8,4)));
         Rows[9].Add((FloatToStrf(SaltElev,ffgeneral,8,4)));
         Rows[10].Add((FloatToStrf(MarshErosion,ffgeneral,8,4)));
-        Rows[11].Add((FloatToStrf(SwampErosion,ffgeneral,8,4)));
-        Rows[12].Add((FloatToStrf(TFlatErosion,ffgeneral,8,4)));
-        Rows[13].Add((FloatToStrf(FixedRegFloodAccr ,ffgeneral,8,4)));
-        Rows[14].Add((FloatToStrf(FixedIrregFloodAccr ,ffgeneral,8,4)));
-        Rows[15].Add((FloatToStrf(FixedTideFreshAccr ,ffgeneral,8,4)));
+        Rows[11].Add((FloatToStrf(MarshErodeFetch,ffgeneral,8,4)));
 
-        Rows[16].Add((FloatToStrf(InlandFreshAccr ,ffgeneral,8,4)));
-        Rows[17].Add((FloatToStrf(MangroveAccr ,ffgeneral,8,4)));
-        Rows[18].Add((FloatToStrf(TSwampAccr ,ffgeneral,8,4)));
-        Rows[19].Add((FloatToStrf(SwampAccr ,ffgeneral,8,4)));
-        Rows[20].Add((FloatToStrf(Fixed_TF_Beach_Sed,ffgeneral,8,4)));
+        Rows[12].Add((FloatToStrf(SwampErosion,ffgeneral,8,4)));
+        Rows[13].Add((FloatToStrf(TFlatErosion,ffgeneral,8,4)));
+        Rows[14].Add((FloatToStrf(FixedRegFloodAccr ,ffgeneral,8,4)));
+        Rows[15].Add((FloatToStrf(FixedIrregFloodAccr ,ffgeneral,8,4)));
+        Rows[16].Add((FloatToStrf(FixedTideFreshAccr ,ffgeneral,8,4)));
 
-        Rows[21].Add((FloatToStrf(IFM2RFM_Collapse,ffgeneral,8,4)));  // 1/11/2016
-        Rows[22].Add(FloatToStrf(RFM2TF_Collapse,ffgeneral,8,4));
+        Rows[17].Add((FloatToStrf(InlandFreshAccr ,ffgeneral,8,4)));
+        Rows[18].Add((FloatToStrf(MangroveAccr ,ffgeneral,8,4)));
+        Rows[19].Add((FloatToStrf(TSwampAccr ,ffgeneral,8,4)));
+        Rows[20].Add((FloatToStrf(SwampAccr ,ffgeneral,8,4)));
+        Rows[21].Add((FloatToStrf(Fixed_TF_Beach_Sed,ffgeneral,8,4)));
 
-        Rows[23].Add(BoolString(Use_Wave_Erosion));
+        Rows[22].Add((FloatToStrf(IFM2RFM_Collapse,ffgeneral,8,4)));  // 1/11/2016
+        Rows[23].Add(FloatToStrf(RFM2TF_Collapse,ffgeneral,8,4));
 
-        Rows[24].Add(BoolString(Use_Preprocessor));
+        Rows[24].Add(BoolString(Use_Wave_Erosion));
 
-        Rows[25].Add(FloatToStrf(InundElev[0],ffgeneral,8,4));
-        Rows[26].Add(FloatToStrf(InundElev[1],ffgeneral,8,4));
-        Rows[27].Add(FloatToStrf(InundElev[2],ffgeneral,8,4));
-        Rows[28].Add(FloatToStrf(InundElev[3],ffgeneral,8,4));
-        Rows[29].Add(FloatToStrf(InundElev[4],ffgeneral,8,4));
+        Rows[25].Add(BoolString(Use_Preprocessor));
+
+        Rows[26].Add(FloatToStrf(InundElev[0],ffgeneral,8,4));
+        Rows[27].Add(FloatToStrf(InundElev[1],ffgeneral,8,4));
+        Rows[28].Add(FloatToStrf(InundElev[2],ffgeneral,8,4));
+        Rows[29].Add(FloatToStrf(InundElev[3],ffgeneral,8,4));
+        Rows[30].Add(FloatToStrf(InundElev[4],ffgeneral,8,4));
 
         NextRow := NUMRowsOrig + 1;
 
@@ -522,29 +526,31 @@ begin
       Rows[8].Add('GT Great Diurnal Tide Range (m)');
       Rows[9].Add('Salt Elev. (m above MTL)');
       Rows[10].Add('Marsh Erosion (horz. m /yr)');
-      Rows[11].Add('Swamp Erosion (horz. m /yr)');
-      Rows[12].Add('T.Flat Erosion (horz. m /yr)');
-      Rows[13].Add('Reg.-Flood Marsh Accr (mm/yr)');
-      Rows[14].Add('Irreg.-Flood Marsh Accr (mm/yr)');
-      Rows[15].Add('Tidal-Fresh Marsh Accr (mm/yr)');
+      Rows[11].Add('Marsh Erosion Fetch (km)');
 
-      Rows[16].Add('Inland-Fresh Marsh Accr (mm/yr)');
-      Rows[17].Add('Mangrove Accr (mm/yr)');
-      Rows[18].Add('Tidal Swamp Accr (mm/yr)');
-      Rows[19].Add('Swamp Accretion (mm/yr)');
-      Rows[20].Add('Beach Sed. Rate (mm/yr)');
+      Rows[12].Add('Swamp Erosion (horz. m /yr)');
+      Rows[13].Add('T.Flat Erosion (horz. m /yr)');
+      Rows[14].Add('Reg.-Flood Marsh Accr (mm/yr)');
+      Rows[15].Add('Irreg.-Flood Marsh Accr (mm/yr)');
+      Rows[16].Add('Tidal-Fresh Marsh Accr (mm/yr)');
 
-      Rows[21].Add('Irreg-Flood Collapse (m)');
-      Rows[22].Add('Reg-Flood Collapse (m)');
+      Rows[17].Add('Inland-Fresh Marsh Accr (mm/yr)');
+      Rows[18].Add('Mangrove Accr (mm/yr)');
+      Rows[19].Add('Tidal Swamp Accr (mm/yr)');
+      Rows[20].Add('Swamp Accretion (mm/yr)');
+      Rows[21].Add('Beach Sed. Rate (mm/yr)');
 
-      Rows[23].Add('Use Wave Erosion Model [True,False]');
-      Rows[24].Add('Use Elev Pre-processor [True,False]');
+      Rows[22].Add('Irreg-Flood Collapse (m)');
+      Rows[23].Add('Reg-Flood Collapse (m)');
 
-      Rows[25].Add('H1 inundation (m above MTL)');
-      Rows[26].Add('H2 inundation (m above MTL; H2>H1)');
-      Rows[27].Add('H3 inundation (m above MTL: H3>H2)');
-      Rows[28].Add('H4 inundation (m above MTL; H4>H3)');
-      Rows[29].Add('H5 inundation (m above MTL; H5>H4)');
+      Rows[24].Add('Use Wave Erosion Model [True,False]');
+      Rows[25].Add('Use Elev Pre-processor [True,False]');
+
+      Rows[26].Add('H1 inundation (m above MTL)');
+      Rows[27].Add('H2 inundation (m above MTL; H2>H1)');
+      Rows[28].Add('H3 inundation (m above MTL: H3>H2)');
+      Rows[29].Add('H4 inundation (m above MTL; H4>H3)');
+      Rows[30].Add('H5 inundation (m above MTL; H5>H4)');
 
       NextRow := NUMRowsOrig + 1;
 

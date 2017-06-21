@@ -42,7 +42,6 @@ TYPE
   MapBoolean = ARRAY of BYTE;
   PMapBoolean = ^MapBoolean;
   PctArray   = ARRAY[0..MaxCats] OF double;
-  ErosionScale = (None,Little,Moderate,Heavy,Severe);
 
 TYPE SAVParamsRec=Record
     Intcpt, C_DEM, C_DEM2, C_DEM3, C_D2MLLW, C_D2MHHW, C_D2M, C_D2M2: Double;  //coefficients for SAV estimation
@@ -380,7 +379,7 @@ Type
     DistanceToOpenSaltWater: Double;
     SubS: TSubSite;
     AdjEFSW, AdjOcean, AdjWater, NearWater, CellFwInfluenced: Boolean;
-    Erosion: ErosionScale;
+    Erosion2: Double;  // Cell Max Fetch in km
     EWCat: Integer;
     CellRow, CellCol: Integer;
     CatElev : Double;

@@ -223,7 +223,7 @@ Var TSS: TSLAMM_Simulation;
           2: If ProtectDeveloped then Result := -99;
           3: If TSS.UseFloodDevDryLand then Result := 22;   // Use Flooded Development
           4: If AdjOcean and OceanNearer Then Result := 11;
-          5: If AdjWater and (Erosion>Heavy) Then Result := 9;
+          5: If AdjWater and (Erosion2>=20) Then Result := 9;
           6: If Tropical and NearWater then Result := 8;
           7: If CellFwInfluenced then Result := 21;
           8: If Tropical then Result := 8;

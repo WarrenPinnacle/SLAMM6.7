@@ -8,9 +8,9 @@ INTERFACE
 
 USES   SysUtils, Windows, Messages, Classes, Graphics, Math, Dialogs;
 
-Const  VersionNum: Double = 6.99;   //used for file reading and writing   6.985 threshold
+Const  VersionNum: Double = 6.991;   //used for file reading and writing   6.9905 threshold
        VersStr  = '6.7.0 beta';
-       BuildStr = '6.7.0238';
+       BuildStr = '6.7.0239';
 
 Const  Feet_Per_Meter = 3.28084;
 
@@ -141,7 +141,7 @@ Type
 
     InundElev : array[0..4] of double; {inundation elevations: 0:H1, 1:H2, 2:H3, 3:H4, 4:H5}
 
-    MarshErosion,
+    MarshErosion, MarshErodeFetch,
     SwampErosion,
     TFlatErosion  : Double;  {horizontal erosion meters / year}
     FixedRegFloodAccr,          {accretion rates, mm / year}
@@ -1508,6 +1508,10 @@ Begin
         end;
 
       TSRead('MarshErosion',MarshErosion);
+
+      If ReadVersionNum > 6.9905 then TSRead('MarshErodeFetch',MarshErodeFetch)
+                                 else MarshErodeFetch := 9;  // 6/21/2017 9km default
+
       TSRead('SwampErosion',SwampErosion);
       TSRead('TFlatErosion',TFlatErosion);
       TSRead('FixedRegFloodAccr',FixedRegFloodAccr);
@@ -1665,6 +1669,7 @@ Begin
       TSWrite('Storm Inundation 2', InundElev[4]);
 
       TSWrite('MarshErosion',MarshErosion);
+      TSWrite('MarshErodeFetch',MarshErodeFetch);
       TSWrite('SwampErosion',SwampErosion);
       TSWrite('TFlatErosion',TFlatErosion);
       TSWrite('FixedRegFloodAccr',FixedRegFloodAccr);
@@ -2024,6 +2029,8 @@ begin
     InundElev := TSS.InundElev;
 
     MarshErosion := TSS.MarshErosion;
+    MarshErodeFetch := TSS.MarshErodeFetch;
+
     SwampErosion := TSS.SwampErosion;
     TFlatErosion   := TSS.TFlatErosion;
     FixedRegFloodAccr := TSS.FixedRegFloodAccr;

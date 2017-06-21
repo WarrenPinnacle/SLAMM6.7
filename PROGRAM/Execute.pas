@@ -647,8 +647,8 @@ begin
     SpecificYearsEdit.Enabled := LSS.RunSpecificYears;
     TimeStepLabel.Enabled := not LSS.RunSpecificYears;
     TimeStepEdit.Enabled := not LSS.RunSpecificYears;
-    LastYearLabel.Enabled := not LSS.RunSpecificYears;
-    LastYearEdit.Enabled := not LSS.RunSpecificYears;
+    LastYearLabel.Enabled := True;  // Last Year always relevant not LSS.RunSpecificYears;
+    LastYearEdit.Enabled := True;  // Last Year always relevant not LSS.RunSpecificYears;
 
     If RunLHCheckBox.Checked then ExecuteButton.Caption := 'Run &Uncertainty' else
        If RunSensBox.Checked then ExecuteButton.Caption := 'Run &Sensitivity'

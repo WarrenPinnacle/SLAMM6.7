@@ -472,8 +472,8 @@ object ExecuteOptionForm: TExecuteOptionForm
     ParentBackground = False
     TabOrder = 2
     object LastYearLabel: TLabel
-      Left = 21
-      Top = 75
+      Left = 16
+      Top = 81
       Width = 147
       Height = 16
       Caption = 'Last Year of Simulation'
@@ -485,8 +485,8 @@ object ExecuteOptionForm: TExecuteOptionForm
       ParentFont = False
     end
     object TimeStepLabel: TLabel
-      Left = 60
-      Top = 45
+      Left = 55
+      Top = 42
       Width = 111
       Height = 16
       Caption = 'Time Step (years)'
@@ -529,8 +529,8 @@ object ExecuteOptionForm: TExecuteOptionForm
       OnClick = A1BClick
     end
     object LastYearEdit: TEdit
-      Left = 176
-      Top = 74
+      Left = 171
+      Top = 80
       Width = 68
       Height = 24
       Font.Charset = ANSI_CHARSET
@@ -544,8 +544,8 @@ object ExecuteOptionForm: TExecuteOptionForm
       OnExit = TimeStepEditExit
     end
     object TimeStepEdit: TEdit
-      Left = 176
-      Top = 42
+      Left = 171
+      Top = 39
       Width = 68
       Height = 24
       Font.Charset = ANSI_CHARSET
