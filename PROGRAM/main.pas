@@ -204,10 +204,10 @@ Begin
       ModifiedLabel.Visible := False;
 
 {$IFDEF Win32}
-      Mainform.Caption := 'SLAMM v6.7 beta, June 2017, 32-bit';
+      Mainform.Caption := 'SLAMM v6.7 beta, September 2017, 32-bit';
 {$ENDIF}
 {$IFDEF Win64}          // Delphi and fpc of 32 Bit Windows
-      Mainform.Caption := 'SLAMM v6.7 beta, June 2017, 64-bit';
+      Mainform.Caption := 'SLAMM v6.7 beta, September 2017, 64-bit';
 {$ENDIF}
 
     End
@@ -346,6 +346,8 @@ end;
 procedure TMainForm.ExecuteButtonClick(Sender: TObject);
 var
   i: IPCCScenarios;
+
+
 begin
   Large_Raster_Edit := False;
 

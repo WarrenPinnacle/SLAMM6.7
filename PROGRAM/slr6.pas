@@ -1915,6 +1915,7 @@ Begin  {MakeDataFile}
         //Elevation Number
         Elev_Number := GetNextNumber(ElevFile, ER, EC);
 
+
 //      Elev_Number := Round(Elev_Number/1.5)*1.5;  // round to nearest 1.5 meters to simulate 5 foot contours
 
         //Slope Number
@@ -1939,6 +1940,7 @@ Begin  {MakeDataFile}
         //  GCPLCC Project - Change to Inland Open Water using input subsite
         //if (Site.GetSubSiteNum(EC,ER)=1) and (NWI_Number = 5) then
         //  NWI_Number := 6;
+
 
         //Fill dryland
         //if (Elev_Number <> Site.NoElevData ) and (NWI_Number=24) and (Elev_Number <> 999) then
@@ -1973,6 +1975,26 @@ Begin  {MakeDataFile}
             if TRUNC(VDNumber) <> NO_DATA then
               MTL_Correction:= VDNumber;
           end;
+
+
+(*       If (Site.GetSubSiteNum(EC,ER)=4) and (TRUNC(elev_number) = NO_DATA)  then
+          Begin
+            Elev_Number := 0.488;  // CASCO, fill phippsburg water elevs based on Route 216, TR 122 Phippsburg.docx
+          End;
+                    *)
+
+(*        //  Casco Bay IFM Fill
+        If (Site.GetSubSiteNum(EC,ER) in [1,2,4]) and (NWI_Number in [12,7]) then
+          Begin
+            NWI_Number := 20;
+          End; *)
+
+ (*       If (Site.GetSubSiteNum(EC,ER)=2) and (NWI_Number = 20)and (TRUNC(elev_number) = NO_DATA)  then
+          Begin
+            Elev_Number := 2.5;
+            MTL_Correction := 0;
+          End;          *)
+
 
         Lagoon_correction := 0;
         If SubSite.LagoonType <> LtNone then
@@ -3569,6 +3591,8 @@ Procedure TSLAMM_Simulation.ExecuteRun;
 Var Prot_Scenario: ProtScenario;
     IPCC_Scenario: IPCCScenarios;
     IPCC_Est     : IPCCEstimates;
+    SaveStream: TMemoryStream;
+
 
           {==============================================================================}
           Procedure InitSubSite(PSS: TSubSite);
@@ -3825,18 +3849,40 @@ Var Prot_Scenario: ProtScenario;
     End;
     {-------------------------------------------------------------------------------------------}
 
+     Procedure SaveSubSites;
+     Begin
+       TSText := False;
+       SaveStream := TMemoryStream.Create;
+       GlobalTS := SaveStream;
+       Site.Store(TStream(SaveStream));  {save for backup in case of cancel click}
+     End;
+
+     Procedure RestoreSubSites;
+     Begin
+       TSText := False;
+       GlobalTS := SaveStream;
+       SaveStream.Seek(0, soFromBeginning); {Go to beginning of stream}
+       Site.Load(VersionNum,TStream(SaveStream));
+       SaveStream.Free;
+     End;
+    {-------------------------------------------------------------------------------------------}
+
+
   Function ExecuteSLAMM(ProtScen:ProtScenario;
                           IPCCScen: IPCCScenarios;IPCCEst: IPCCEstimates; FixNum: Integer; TSSLRi: Integer): Boolean;
                            {Execute a single iteration of SLAMM}
    Var  i,j : Integer;
         MR: TModalResult;
    BEGIN
+     SaveSubsites;
      DikeLogInit := False;
      Inc(ScenIter);
 
      ScaleCalcs;
      Result := CheckValidSLAMM;
-     If Not Result then Begin UserStop := True; Exit; End;
+     If Not Result then Begin UserStop := True; RestoreSubSites; Exit; End;
+
+
 
      //Delete SAV maps options from the gridform.graphbox
      GridForm.GraphBox.Items.Delete(14);
@@ -3856,7 +3902,7 @@ Var Prot_Scenario: ProtScenario;
        FWFLows[i].RetentionInitialized := False; *)
 
     Result := MakeDataFile(False,'','');
-     If Not Result then Begin UserStop := True; Exit; End;
+     If Not Result then Begin UserStop := True; RestoreSubSites; Exit; End;
 
     Site.InitElevVars;
 
@@ -3902,14 +3948,14 @@ Var Prot_Scenario: ProtScenario;
           RunPanel.Visible := False;
 
           Result := ShowMap(Site.RunRows,Site.RunCols,Site,Self);
-          If (Not Result) or (UserStop) then Begin Result := False; UserStop:=True; Exit; End;
+          If (Not Result) or (UserStop) then Begin Result := False; UserStop:=True; RestoreSubSites; Exit; End;
 
           Year := 0;
           ShowRunPanel;
         End;
 
     Result := PreProcessWetlands;
-    If Not Result then Begin UserStop := True; Exit; End;
+    If Not Result then Begin UserStop := True; RestoreSubSites; Exit; End;
 
     Year :=  Site.GlobalSite.NWI_Photo_Date;
     InitSubSite(Site.GlobalSite);
@@ -3936,7 +3982,7 @@ Var Prot_Scenario: ProtScenario;
        then Result := CalcSalinity(true,true)  //not using raster salinity file so try to calc salinity
        else Result := True;
 
-    If Not Result then Begin UserStop := True; Exit; End;
+    If Not Result then Begin UserStop := True; Exit;RestoreSubSites; End;
 
     // Connectivity and Inundation Maps for initial conditions
     InundFreqCheck := False;
@@ -3946,7 +3992,7 @@ Var Prot_Scenario: ProtScenario;
         InundFreqCheck := Result;
       end
         else Inund_Arr := nil;
-    If Not Result then Begin UserStop := True; Exit; End;
+    If Not Result then Begin UserStop := True;RestoreSubSites; Exit; End;
 
     ConnectCheck := False;
     if CheckConnectivity or ConnectMaps then
@@ -3956,7 +4002,7 @@ Var Prot_Scenario: ProtScenario;
       end
     else
       Connect_Arr := nil;
-    If Not Result then Begin UserStop := True; Exit; End;
+    If Not Result then Begin UserStop := True; RestoreSubSites;Exit; End;
 
     // SAV Map for initial conditions
     SAV_KM  := -9999;
@@ -3966,7 +4012,7 @@ Var Prot_Scenario: ProtScenario;
         Result := CalculateProbSAV(False);
         SAVProbCheck := Result;
       end;
-    If Not Result then Begin UserStop := True; Exit; End;
+    If Not Result then Begin UserStop := True; RestoreSubSites;Exit; End;
 
     // Calculate  frequency of road inundation if relevant
     RoadInundCheck := False;
@@ -3975,13 +4021,13 @@ Var Prot_Scenario: ProtScenario;
         for j:=0 to NRoadInf-1 do
           RoadInundCheck := RoadsInf[j].CalcAllRoadsInundation;
         Result := RoadInundCheck;
-        If Not Result then Begin UserStop := True; Exit; End;
+        If Not Result then Begin UserStop := True;RestoreSubSites; Exit; End;
       End;
     If NPointInf>0 then
      for j:=0 to NPointInf-1 do
       Begin
         Result := PointInf[j].CalcAllPointInfInundation;
-        If Not Result then Begin UserStop := True; Exit; End;
+        If Not Result then Begin UserStop := True; RestoreSubSites;Exit; End;
       End;
 
     If GridForm.Visible then  {display map after pre-processor and salinity calculation}
@@ -4002,7 +4048,7 @@ Var Prot_Scenario: ProtScenario;
                  IF (MR=2) then if MessageDlg('Stop Simulation Execution And Return to Main Menu? ',mtconfirmation,[mbyes,mbno],0) = mryes then
                      MR := MRAbort;   // Disambiguation of X key
 
-                 If MR = MRAbort then Begin Result := False; UserStop:=True; exit; End;
+                 If MR = MRAbort then Begin Result := False; UserStop:=True; RestoreSubSites;exit; End;
                  If MR = MRIgnore then QA_Tools := False;
                  Show; Update; MapTitle.Visible := False; IsVisible := True;
            end;
@@ -4011,7 +4057,7 @@ Var Prot_Scenario: ProtScenario;
 
         If Maps_to_MSWord or Maps_to_GIF then Result := CopyMapsToMSWord; // 12/15/09 Wait for pre-processing & Salinity Calcs
 
-        If Not Result then Begin UserStop := True; Exit; End;
+        If Not Result then Begin UserStop := True; RestoreSubSites;Exit; End;
 
         Year :=  Site.GlobalSite.NWI_Photo_Date;  // return to current date
 
@@ -4044,7 +4090,7 @@ Var Prot_Scenario: ProtScenario;
 
     If Not Result then
       Begin
-        UserStop:=True;
+        UserStop:=True;  RestoreSubSites;
         Exit;
       End;
 
@@ -4055,10 +4101,10 @@ Var Prot_Scenario: ProtScenario;
         ZeroSums;
 
         Result := RunOneYear(False);
-        If Not Result then Begin UserStop:=True; Exit; End;
+        If Not Result then Begin UserStop:=True; RestoreSubSites;Exit; End;
 
         IF SaveGIS Then If GISForm.OutputYear(Year) THEN Result := Save_GIS_Files;
-        If Not Result then Begin UserStop:=True; Exit; End;
+        If Not Result then Begin UserStop:=True; RestoreSubSites;Exit; End;
 
       If GridForm.Visible then
       With GridForm do
@@ -4074,14 +4120,14 @@ Var Prot_Scenario: ProtScenario;
                      IF (MR=2) then if MessageDlg('Stop Simulation Execution And Return to Main Menu? ',mtconfirmation,[mbyes,mbno],0) = mryes then
                        MR := MRAbort;   // Disambiguation of X key
 
-                     If MR = MRAbort then Begin Result := False; UserStop:=True; exit; End;
+                     If MR = MRAbort then Begin Result := False; UserStop:=True; RestoreSubSites;exit; End;
                      If MR = MRIgnore then QA_Tools := False;
                      Show; Update; MapTitle.Visible := False; IsVisible := True;
                end;
          ShowRunPanel;
 
          If Maps_to_MSWord or Maps_to_GIF then Result := CopyMapsToMSWord;
-         If Not Result then Begin UserStop := True; Exit; End;
+         If Not Result then Begin UserStop := True; RestoreSubSites;Exit; End;
        End;
 
       UNTIL Year >= MaxYear;
@@ -4101,6 +4147,7 @@ Var Prot_Scenario: ProtScenario;
   { SetLength(Map,0); {deallocate memory}
     ProgForm.Hide;
     Gridform.RunPanel.Visible := False;
+    RestoreSubSites;
 
   END; {EXECUTESLAMM }
 

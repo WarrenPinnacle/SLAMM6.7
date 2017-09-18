@@ -26,7 +26,7 @@ Coordinates=586,122,63,51
 Coordinates=776,530,68,33
 
 []
-Coordinates=0,0,94,51
+Coordinates=220,1,124,51
 Visible=True
 
 [AddEst]
@@ -320,12 +320,6 @@ Coordinates=1200,518,91,51
 [InfDotSizeBox]
 Coordinates=1071,848,84,87
 Visible=True
-
-[ExtractDataShpButton]
-Coordinates=220,1,124,51
-
-[LoadSHPButton]
-Coordinates=687,338,93,51
 
 [OmitT030]
 Coordinates=1185,185,61,51

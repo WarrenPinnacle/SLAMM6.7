@@ -138,13 +138,15 @@ type
     SVOGISReadWrite2: TSVOGISReadWrite;
     SaveDialog1: TSaveDialog;
     OmitT030: TButton;
-    LoadSHPButton: TButton;
-    ExtractDataShpButton: TButton;
     Gauge1: TGauge;
     ErodePanel: TPanel;
     EditAlpha: TButton;
     CalcWaveErosion: TButton;
     EditWinds: TButton;
+    LoadSHPButton: TButton;
+    ExtractDataShpButton: TButton;
+    Panel8: TPanel;
+    Label3: TLabel;
     procedure ViewLegButtClick(Sender: TObject);
     procedure HaltButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -5245,7 +5247,7 @@ begin
   {}
 end;
 
-Const   NWetland=24;
+Const   NWetland=26;
         NDUcksWetland=7;
         TotNWetland=NWetland+NDucksWetland+3;  // Land categories plus 3 ("OW interface," "Edge Density," & "marsh width")
 
@@ -5385,13 +5387,13 @@ var
     // Calcualate cell coverage for Ducks categories
     //==================================================================================
     begin
-      {Non Tidal}            PWetArray^[NWetland+1] := PWetArray^[1] + PWetArray^[2] + PWetArray^[23];
-      {Freshwater Non Tidal} PWetArray^[NWetland+2] := PWetArray^[3] + PWetArray^[4]+PWetArray^[5] + PWetArray^[21];
+      {Non Tidal}            PWetArray^[NWetland+1] := PWetArray^[1] + PWetArray^[2] + PWetArray^[25];
+      {Freshwater Non Tidal} PWetArray^[NWetland+2] := PWetArray^[3] + PWetArray^[4]+PWetArray^[5] + PWetArray^[22];
       {Open Water}           PWetArray^[NWetland+3] := PWetArray^[15] + PWetArray^[16] + PWetArray^[17] + PWetArray^[18] + PWetArray^[19];
-      {Low Tidal }           PWetArray^[NWetland+4] := PWetArray^[10] + PWetArray^[11] + PWetArray^[12] + PWetArray^[13] + PWetArray^[14] ;  // no flooded developed
+      {Low Tidal }           PWetArray^[NWetland+4] := PWetArray^[10] + PWetArray^[11] + PWetArray^[12] + PWetArray^[13] + PWetArray^[14] {+ PWetArray^[25] };  // no flooded developed
       {Salt Marsh}           PWetArray^[NWetland+5] := PWetArray^[8];
-      {Transitional}         PWetArray^[NWetland+6] := PWetArray^[7] + PWetArray^[9] + PWetArray^[20] + PWetArray^[24];  // includes flooded forest
-      {Freshwater Tidal}     PWetArray^[NWetland+7] := PWetArray^[6] + PWetArray^[22];
+      {Transitional}         PWetArray^[NWetland+6] := PWetArray^[7] + PWetArray^[9] + PWetArray^[20] + PWetArray^[26];  // includes flooded forest
+      {Freshwater Tidal}     PWetArray^[NWetland+7] := PWetArray^[6] + PWetArray^[23];
     end;
     //=================================================================================
     Procedure CheckCellAdj(R,C: Integer);
@@ -5546,7 +5548,7 @@ begin
        Write(outfile,'N A,N A,N A'); // protection and SLR unknown for now
        For c:=1 to NWetland do
          Write(Outfile,',',floattostrf(WetlandCells[i,shp,c]*Sqr(SS.Site.RunScale)/10000,ffgeneral,8,4)); // ha
-       Write(Outfile,',-9999'); // Marsh to Open W
+       Write(Outfile,',-9999'); // SAV Model results cannot be extracted
        For c:=NWetland+1 to NWetland+NDucksWetland do
          Write(Outfile,',',floattostrf(WetlandCells[i,shp,c]*Sqr(SS.Site.RunScale)/10000,ffgeneral,8,4)); // ha
 
@@ -5568,8 +5570,10 @@ begin
                       {m}        {m2}
        NonFrag  := WetlandArea / 10000 * (4/5-EdgeDens)/(4/5-2*SQRT(PI/WetlandArea));
                       {m2}      {m2/ha}   { unitless normalized non frag density }
-       Write(Outfile,',',floattostrf(NonFrag,ffgeneral,8,4));  // Non Fragmented Density (edge density in ha)
+       Write(Outfile,',',floattostrf(NonFrag,ffgeneral,8,4));  // Non Fragmented Density (unitless)
                                        {ha}
+       Write(Outfile,',',floattostrf(EdgeDens,ffgeneral,8,4));   // Edge Density (m/m2)
+
        If WriteLength then
         Begin
           If MarshLengths[shp] < tiny then MWid := 0 else

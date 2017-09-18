@@ -436,6 +436,8 @@ Var IPCCYearIndex: 1..4;
 Var i: Integer;
     TSS: TSubSite;
     YearZero: Integer;
+    SubSiteAdj: Double;
+
 
 Begin   // EustaticSLChange
   If IsT0 then DT := 0
@@ -481,12 +483,32 @@ Begin   // EustaticSLChange
                 End;
             End;
 
-
           NewSL := Norm *0.01;  {NewSL is Eustatic SLR since simulation start}
           { m       cm   }
 
           SLRise := NewSL - OldSL;   {Eustatic SLR this time-step}
            {m}       {m}     {m}
+
+(*          {CASCO CODE}
+          SubsiteAdj := ((Historic_trend - Historic_Eustatic_trend) * (year-YearZero)) / 1000;   {/CASCO CODE}
+            {m}             {mm/year}              {mm/year}               {years}      {mm to m}
+
+          If NewSL + Site.GlobalSite.MHHW + SubSiteAdj > OVERTOPHEIGHT[i] then  {/CASCO OVERTOP CODE}
+            Begin
+              TSS.GTideRange := Site.GlobalSite.GTideRange;
+              TSS.SaltElev := Site.GlobalSite.SaltElev;
+              Site.InitElevVars;                                  // Set mhhw mllw etc. don't change drainage and water type for now
+            End
+          else  // not overtopped
+            If i=4 //phippsburg is subsite 4
+              then
+                begin
+                  TSS.GTideRange := 2*(Site.GlobalSite.MHHW*0.344576+(NewSL - 0.066)*(0.344576-1)+0.841829);          //adjust phippsburg tidal range here
+                  TSS.SaltElev := Site.GlobalSite.SaltElev*0.344576+(NewSL - 0.066)*(0.344576-1)+0.841829;
+                  Site.InitElevVars;                                  // Set mhhw mllw etc
+                end;
+           {/CASCO CODE} *)
+
 
           If IsT0 then T0SLR := SLRise;  { Eustatic SLR at T0 if relevant (if this subsite NWI_Photo_Date less than others}
 
@@ -1497,8 +1519,8 @@ Begin
           End; //Case
 
         If USE_DATAELEV and (OptimizeLevel>1) and (Acc > 0)
-           then DataElev[(Site.RunCols*ER)+EC] := DataElev[(Site.RunCols*ER)+EC] +  Round(Acc)
-                 {mm}                                {mm}                                {mm}
+           then DataElev[(Site.RunCols*ER)+EC] :=  Min(DataElev[(Site.RunCols*ER)+EC] +  Round(Acc), 65535);
+                 {mm}                                    {mm}                                {mm}    {max elev (word)}
       End; {with}
    End;
 End; {ChngWater}

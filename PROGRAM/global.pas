@@ -8,9 +8,12 @@ INTERFACE
 
 USES   SysUtils, Windows, Messages, Classes, Graphics, Math, Dialogs;
 
+Const OVERTOPHEIGHT : Array[0..20] of Double  = ( 9999, 1.7,  4.0, 9999, 2.6, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999);  // CASCO BAY CODE
+                                               {global}{dans} {nm} {ss3} {phipps} {global site included} {m above MTL}
+
 Const  VersionNum: Double = 6.991;   //used for file reading and writing   6.9905 threshold
        VersStr  = '6.7.0 beta';
-       BuildStr = '6.7.0239';
+       BuildStr = '6.7.0240';
 
 Const  Feet_Per_Meter = 3.28084;
 
@@ -181,8 +184,6 @@ Type
     RAccrD   : TAccrVar; {mm/year}         //rescaled accretion values
 
     AccrNotes: TAccrNotes;
-
-
 
     {Calculations below here}
     MHHW,
@@ -514,6 +515,7 @@ Function CharOccurs(const str: string; c: char): integer;
 
 Implementation
 
+uses System.UITypes;
 
     function GetLogicalCpuCount: Integer;
     var SystemInfo: _SYSTEM_INFO;
