@@ -3854,7 +3854,7 @@ Var Prot_Scenario: ProtScenario;
        TSText := False;
        SaveStream := TMemoryStream.Create;
        GlobalTS := SaveStream;
-       Site.Store(TStream(SaveStream));  {save for backup in case of cancel click}
+       Site.Store(TStream(SaveStream));  {save for backup if subsites are changed mid run (e.g. casco code) }
      End;
 
      Procedure RestoreSubSites;

@@ -1410,6 +1410,7 @@ function TSLAMM_Simulation.ChngWater(CalcMF, CalcGeometry: Boolean): Boolean;
            begin
             If ThreadArr2[CCloop].MaxWE >Max_WErode then Max_WErode := ThreadArr2[CCloop].MaxWE;
             if ThreadArr2[CCloop].UserStop then Result := False;
+            ThreadArr2[CCloop].Terminate;
             ThreadArr2[CCLoop].Free;
            end;
         End;   {Parallel_Execute}

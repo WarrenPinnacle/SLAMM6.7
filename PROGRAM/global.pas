@@ -13,7 +13,7 @@ Const OVERTOPHEIGHT : Array[0..20] of Double  = ( 9999, 1.7,  4.0, 9999, 2.6, 99
 
 Const  VersionNum: Double = 6.991;   //used for file reading and writing   6.9905 threshold
        VersStr  = '6.7.0 beta';
-       BuildStr = '6.7.0240';
+       BuildStr = '6.7.0241';
 
 Const  Feet_Per_Meter = 3.28084;
 

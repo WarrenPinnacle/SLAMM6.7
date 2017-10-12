@@ -11,7 +11,7 @@ type
     fTerminateSignal:TEvent;
   public
     procedure Resumed; virtual;
-    Procedure WaitForResume;
+    Function WaitForResume: Boolean;
     Procedure Start;
     constructor Create;
     destructor Destroy; override;
@@ -137,10 +137,12 @@ Procedure TChngWaterThread.Execute;
 Begin
    UserStop := not SS.ThreadChngWater(StR,EnR,Self);
    ImDone := True;
-   WaitForResume;
-   ImDone := False;
-   UserStop := not SS.CalculateMaxFetch(StR,EnR,Self,MaxWE);
-   ImDone := True;
+   If WaitForResume then
+     Begin
+       ImDone := False;
+       UserStop := not SS.CalculateMaxFetch(StR,EnR,Self,MaxWE);
+       ImDone := True;
+     End;
 End;
 
 {------------------------------ TUpdateElevsThread ------------------------------}
@@ -207,18 +209,21 @@ begin
   fResumeSignal.ResetEvent;
 end;
 
-procedure TSuspendResumeThread.WaitForResume;
+Function TSuspendResumeThread.WaitForResume;
   var
     vWaitForEventHandles:array[0..1] of THandle;
     vWaitForResponse:DWORD;
   begin
+    Result := False;
     vWaitForEventHandles[0] := fResumeSignal.Handle;
     vWaitForEventHandles[1] := fTerminateSignal.Handle;
-    vWaitForResponse := WaitForMultipleObjects(2, @vWaitForEventHandles[0], False, INFINITE);
+    While not Terminated do
+      vWaitForResponse := WaitForMultipleObjects(2, @vWaitForEventHandles[0], False, 1000);
+
     case vWaitForResponse of
     WAIT_OBJECT_0 + 1: Terminate;
     WAIT_FAILED: RaiseLastOSError;
-    else Resumed
+    else Begin Result := True; Resumed End;
     end;
   end;
 
