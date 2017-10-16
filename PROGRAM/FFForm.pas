@@ -248,7 +248,7 @@ Var  Ct : Integer;
      nSeries: integer;
      NBin: integer;
      NHistAgg: integer;
-     UHistogram:  Array[1..NUM_SAL_METRICS,1..MaxCats] of array of Integer;
+     UHistogram:  Array[1..NUM_SAL_METRICS,0..MaxCats-1] of array of Integer;
 
 
      Procedure InitNewSeries;

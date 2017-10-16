@@ -2778,7 +2778,7 @@ Begin
    If (Init_SalStats=False) and ((trim(SalFileN)='') or (pos('.xls',lowercase(SalFileN))>0)) then
     Begin
       MessageDlg('Salinity statistics must be calculated by running the model to the start of time-zero.',mterror,[mbok],0);
-      Exit;
+      // Exit;
     End;
 
    If (Init_SalStats=False) and ((trim(SalFileN)<>'') and (pos('.xls',lowercase(SalFileN))=0)) then

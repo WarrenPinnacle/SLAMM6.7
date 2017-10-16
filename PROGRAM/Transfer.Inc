@@ -835,7 +835,8 @@ Begin
       (Cell.Cats[i] <> Blank) then
      Begin
        Cat := Cell.Cats[i];
-       nrules := Categories.GetCat(Cat).SalinityRules.NRules;
+       nrules := 0;
+       If Categories.GetCat(Cat).SalRules then nrules := Categories.GetCat(Cat).SalinityRules.NRules;
        for j  := 0 to nrules-1 do
          Begin
            TSR := Categories.GetCat(Cat).SalinityRules.Rules[j];    // Handle case of multiple salinity rules

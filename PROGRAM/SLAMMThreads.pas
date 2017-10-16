@@ -77,6 +77,7 @@ Uses Progress;
 
 destructor trunthread.Destroy;
 begin
+  Start();
   Terminate;
   inherited;
 end;
@@ -193,6 +194,7 @@ end;
 
 destructor TSuspendResumeThread.Destroy;
 begin
+  Start();
   inherited;
   fResumeSignal.Free;
   fTerminateSignal.Free;
@@ -217,14 +219,12 @@ Function TSuspendResumeThread.WaitForResume;
     Result := False;
     vWaitForEventHandles[0] := fResumeSignal.Handle;
     vWaitForEventHandles[1] := fTerminateSignal.Handle;
-    While not Terminated do
-      vWaitForResponse := WaitForMultipleObjects(2, @vWaitForEventHandles[0], False, 1000);
-
+    vWaitForResponse := WaitForMultipleObjects(2, @vWaitForEventHandles[0], False, INFINITE);
     case vWaitForResponse of
-    WAIT_OBJECT_0 + 1: Terminate;
-    WAIT_FAILED: RaiseLastOSError;
-    else Begin Result := True; Resumed End;
-    end;
+        WAIT_OBJECT_0 + 1: Terminate;
+        WAIT_FAILED: RaiseLastOSError;
+        else Resumed
+      end; {case}
   end;
 
 end.
