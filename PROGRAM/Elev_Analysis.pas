@@ -545,6 +545,14 @@ Var nRows, i: Integer;
       End; {case}
     End;
 
+    Procedure CheckValidElevStats;
+    Var catloop, nelevstats: Integer;
+    Begin
+      nElevStats := ElevAreasBox.Items.Count;
+      for CatLoop := 0 to SS.Categories.NCats-1 do
+        If Length(SS.Categories.GetCat(CatLoop).ElevationStats)<nelevStats then SS.Init_ElevStats := False;
+    End;
+
 Var catloop: Integer;
     rowindex: integer;
     MaxHTU, MinHTU, HT: Double;
@@ -553,6 +561,8 @@ Var catloop: Integer;
     CNumUnit, CNumZero, CNum, CNumArea: integer;
 begin
   SS.Site.InitElevVars;  {ensure half tide range is properly accounted for by setting MHHW}
+
+  If SS.Init_ElevStats then CheckValidElevStats;
 
   With TSGrid do
     Begin

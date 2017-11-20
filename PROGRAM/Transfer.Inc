@@ -1518,7 +1518,8 @@ Begin
             TSwamp    : ACC := DeltaT * TSwampAccr;
             Swamp     : ACC := DeltaT * SwampAccr;
                         {mm}    {yr}      {mm/yr}
-          End; //Case
+          End   //Case
+        else;
 
         If USE_DATAELEV and (OptimizeLevel>1) and (Acc > 0)
            then DataElev[(Site.RunCols*ER)+EC] :=  Min(DataElev[(Site.RunCols*ER)+EC] +  Round(Acc), 65535);
