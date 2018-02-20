@@ -5415,6 +5415,11 @@ begin
 
   If Not Get_UncertResults_Param(BaseFileName,BaseExt, BaseDir,NumIter,N_GISYears,TimeZero,GISYrArray) then exit;
 
+  If N_GISYears = 0 then Begin
+                           ShowMessage('Error, cannot find GIS files with Base File Name "'+BaseFileName+'"');
+                           Exit;
+                         End;
+
   If Not PromptForFileName(SaveFileN,'csv files|*.csv','.csv','Select Output CSV File','',True) then exit;
   AssignFile(Outfile,SaveFileN);
   Rewrite(OutFile);
