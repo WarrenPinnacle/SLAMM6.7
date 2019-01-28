@@ -147,6 +147,7 @@ type
     ExtractDataShpButton: TButton;
     Panel8: TPanel;
     Label3: TLabel;
+    SVOGISReadWrite3: TSVOGISReadWrite;
     procedure ViewLegButtClick(Sender: TObject);
     procedure HaltButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -3194,7 +3195,7 @@ begin       {ImportRoadClick}
 
                               X2 := IntPtArr[m].X;
                               Y2 := IntPtArr[m].Y;
-                              LineLength := Dist;
+                              LineLength := Dist * SS.Site.ReadScale;   // 1/17/2019 add scale of map for proper counting stats on road flooding
 
                               SetLength(InundFreq,1);  // minimum length;
                               RoadClass := RoadClassNum;
@@ -5169,6 +5170,10 @@ Var
   StudyXMin, StudyXMax, StudyYMin, StudyYMax, Rnscale: Double;
   RnRows: Integer;
 
+  DMTPolyShape3: TSVOPolygonShape;
+  DataPoints3: TSVOShapePointArray;
+
+
   Function StudyX(indx: Integer): Double;
   Begin
     StudyX := (DataPoints[k].X - StudyXMin) / RnScale;
@@ -5244,12 +5249,80 @@ begin
 
   ProgForm.Cleanup;
   ExtractDataShpButton.Enabled := True;
+
+  // FIXME hubba hubba
+
+  ShowMessage('Now please select the dry-land buffer shapefile');
+
+  IF Not OpenDialog1.Execute THEN Exit;
+
+  IF OpenDialog1.FilterIndex = 1 Then SVOGISReadWrite3.FileType := sftShapeFile;
+  IF OpenDialog1.FilterIndex = 2 Then
+    Begin
+      MessageDlg('Error, areas to process for the DMT must be a "*.shp" shapefile',mterror,[mbOK],0);
+      Exit;
+    End;
+
+    DMMTShapeList := TSVOShapeList.Create;
+    SVOGISReadWrite3.ShapeList := DMMTShapeList;
+    SVOGISReadWrite3.ImportFileName := OpenDialog1.Filename;
+
+    ProgForm.Setup('Reading Shape File','','','',False);
+
+    ErrNum := SVOGISReadWrite3.ReadFile;
+    If ErrNum > 0 then
+        Begin
+          MessageDlg('Error Reading shape file '+ OpenDialog1.Filename,mterror,[mbOK],0);
+          SVOGISReadWrite3.Active := False;
+          SVOGISReadWrite3.Shapelist.Destroy;
+          Exit;
+        End;
+
+    OpenDialog1.InitialDir := ExtractFileDir(OpenDialog1.FileName);  // set directory for next time
+
+  With SS.Site do
+    Begin
+      RnScale := RunScale;
+      RnRows := RunRows;
+      StudyXMin := LLXCorner;              // projection units
+      StudyXMax := LLXCorner + RunCols*RunScale;
+      StudyYMin := LLYCorner;
+      StudyYMax := LLYCorner + RunRows*RunScale;
+    End;
+
+  For i := 0 to DMMTShapeList.Count-1 do
+    Begin
+      DMTPolyShape3 :=  TSVOPolygonShape(DMMTShapeList.Items[i]);
+
+      If DMTPolyShape3.ShapeType <> STPolygon then
+         Begin
+           MessageDlg('Error, Infrastructure ShapeFile must be a "polygon" shapefile',mterror,[mbOK],0);
+           DMMTShapeList.Free;
+           Exit;
+         End;
+
+      For j := 0 to DMTPolyShape3 .PartsList.Count-1 do  // j polygons for each record
+       For k := 0 to DMTPolyShape3.PartsList.Items[j].Count-1 do // k points per polygons
+         With SS.Site do  // transform from projection units to a floating point on the SLAMM scale [0..NRow-1, 0..NCol-1]
+           Begin
+             DataPoints := DMTPolyShape3.PartsList.Items[j];
+             If k=0 then Image1.Canvas.MoveTo(Round(StudyX(k)*Zoomfactor),Round(StudyY(k)*ZoomFactor))
+                    else Image1.Canvas.LineTo(Round(StudyX(k)*Zoomfactor),Round(StudyY(k)*ZoomFactor));
+             If k= DMTPolyShape3.PartsList.Items[j].Count-1 then Image1.Canvas.LineTo(Round(StudyX(0)*Zoomfactor),Round(StudyY(0)*ZoomFactor))
+           End;
+
+
+    End; // i loop
+
+  ProgForm.Cleanup;
+  ExtractDataShpButton.Enabled := True;
+
   {}
 end;
 
 Const   NWetland=26;
         NDUcksWetland=7;
-        TotNWetland=NWetland+NDucksWetland+3;  // Land categories plus 3 ("OW interface," "Edge Density," & "marsh width")
+        TotNWetland=NWetland+NDucksWetland+5;  // Land categories plus 3 ("OW interface," "Edge Density," & "marsh width", "dry land in buffer" & "pct dry land lost in buffer")
 
 Function TGridForm.Get_UncertResults_Param(var BaseFileName, BaseExt, BaseDir: string; var NumIter, N_GISYears, TimeZero: integer; var GISYrArray: array of integer): Boolean;
 //===============================================================================
@@ -5373,6 +5446,9 @@ var
   FlatIndex: LongInt;
   NonFrag, EdgeDens, Perimeter, ShapeX, ShapeY, MWid, WetlandArea: Double;
   DMTPolyShape: TSVOPolygonShape;
+  DMTPolyShape3: TSVOPolygonShape;
+  CellPolys2: Array of CellPolyRec;
+
   SIF: TSLAMMInputFile;
   ReadOK: Boolean;
   Num: Single;
@@ -5473,6 +5549,37 @@ begin
             End;
         End;
 
+   // Store which cells belong to which polygons
+    With SS.Site do Setlength(CellPolys2,RunRows*RunCols);
+    for ER := 0 to SS.Site.RunRows-1 do
+      for EC := 0 to SS.Site.RunCols-1 do
+        begin
+          ProgForm.Update2Gages(Trunc(100*(ER/SS.Site.RunRows)),0);
+          FlatIndex := (SS.Site.RunCols*ER)+EC;
+          CellPolys2[FlatIndex].nshapes := 0;
+          CellPolys2[FlatIndex].ShapeIndexes := nil;
+
+          With SS.Site do
+            Begin
+              ShapeX  := ((EC+0.5) * RunScale) + LLXCorner;
+              ShapeY  := -(RunScale*(ER+0.5-RunRows)) + LLYCorner;
+            End;
+
+          For i := 0 to DMMTShapeList3.Count-1 do
+            Begin
+              DMTPolyShape :=  TSVOPolygonShape(DMMTShapeList.Items[i]);
+              If DMTPolyShape.PointInPolygon(ShapeX,ShapeY) then
+               with CellPolys3[FlatIndex] do
+                Begin
+                  Inc(nshapes);
+                  If Length(shapeindexes)< nshapes
+                     then SetLength(shapeindexes,nshapes*2);
+                  ShapeIndexes[nshapes-1] := i;
+                End;
+            End;
+        End;
+
+
   SetLength(WetlandCells,N_GISYears);
   With SS.Site do SetLength(CatMap,RunRows * RunCols);
 
@@ -5531,11 +5638,19 @@ begin
                    For shp := 0 to nshapes-1 do
                      Begin
                        Inc(WetlandCells[i,ShapeIndexes[shp],CatMap[FlatIndex]]);
-                       WetlandCells[i,ShapeIndexes[shp],TotNWetland] := WetlandCells[i,ShapeIndexes[shp],TotNWetland] + MWI;  // marsh water interface count
-                       WetlandCells[i,ShapeIndexes[shp],TotNWetland-1] := WetlandCells[i,ShapeIndexes[shp],TotNWetland-1] + NPerimeter; // marsh perimter count
+                       WetlandCells[i,ShapeIndexes[shp],TotNWetland-2] := WetlandCells[i,ShapeIndexes[shp],TotNWetland-2] + MWI;  // marsh water interface count
+                       WetlandCells[i,ShapeIndexes[shp],TotNWetland-3] := WetlandCells[i,ShapeIndexes[shp],TotNWetland-3] + NPerimeter; // marsh perimter count
                      End;
 
                  End; // nshapes > 0 and cat>0
+
+               If (CatMap2[FlatIndex]>0) and (nshapes > 0) then
+                 Begin
+                   If CatMap2[FlatIndex] in [1,2] then
+                      Inc(WetlandCells[i,ShapeIndexes[shp],TotNWetland-1]);  // dry land in buffer count
+                      if i=0 then Inc(WetlandCells[i,ShapeIndexes[shp],TotNWetland-1]);  // TZero dry land in buffer count
+                 End;
+
              End; // ER, EC
 
 
@@ -5557,10 +5672,10 @@ begin
        For c:=NWetland+1 to NWetland+NDucksWetland do
          Write(Outfile,',',floattostrf(WetlandCells[i,shp,c]*Sqr(SS.Site.RunScale)/10000,ffgeneral,8,4)); // ha
 
-       Write(Outfile,',',floattostrf(WetlandCells[i,shp,TotNWetland]*SS.Site.RunScale,ffgeneral,8,4)); // Marsh to OW interface in meters
+       Write(Outfile,',',floattostrf(WetlandCells[i,shp,TotNWetland-2]*SS.Site.RunScale,ffgeneral,8,4)); // Marsh to OW interface in meters
                                                {count}                          {m}
 
-       Perimeter := WetlandCells[i,shp,TotNWetland-1]*SS.Site.RunScale; // Marsh Perimeter in meters
+       Perimeter := WetlandCells[i,shp,TotNWetland-3]*SS.Site.RunScale; // Marsh Perimeter in meters
                                {count}                          {m}
        WetlandArea := 0;
        z := 8;  WetlandArea := WetlandArea + WetlandCells[i,shp,z]*Sqr(SS.Site.RunScale);  //r.f.m
@@ -5586,6 +5701,9 @@ begin
              {m}           {n saltmarsh cells}         {n transitional cells}                    {m2}            {m}
           Write(Outfile,',',floattostrf(MWid,ffgeneral,8,4));
         End;
+
+        Write(Outfile,',',floattostrf(WetlandCells[i,shp,TotNWetland-1]*Sqr(SS.Site.RunScale)/10000,ffgeneral,8,4)); // ha
+        Write(Outfile,',',floattostrf(WetlandCells[i,shp,TotNWetland-1]/floattostrf(WetlandCells[i,shp,TotNWetland],ffgeneral,8,4)); // fraction of t-zero
 
        Writeln(OutFile);
      End;   //i to NGIS_Years
