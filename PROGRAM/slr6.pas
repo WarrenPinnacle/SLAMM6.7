@@ -208,7 +208,7 @@ TYPE
        RowLabel          : str_vector1;
 
        BMatrix : MapBoolean;
-       ErodeMatrix: MapWord;        {Matrix of Erosion that has already occured at a given cell coordinate}
+       ErodeMatrix: MapWord;        {Matrix of Erosion that has already occured at a given cell coordinate  in cm increments}
        MapMatrix: MapDisk;
        DataElev : Array of Word;    {Elevations  0..65535 in mm starting at - 10 meters  so range of -10.000m to 55.535 meters with 1mm precision}
        MaxFetchArr : Array of Word; {Max Fetch   0..65535 in m}
@@ -2084,7 +2084,7 @@ Begin  {MakeDataFile}
 
          //Set cell slope
          If (TRUNC(Slope_Number) <> NO_DATA) then
-           ReadCell.TanSlope:=Tan(DegToRad(Slope_Number));
+           ReadCell.TanSlope:=ABS(Tan(DegToRad(Slope_Number)));  //6/17/19  negative slopes are unexpected and do not work in equations
 
          //Dike elevation adjustments
          if (not ClassicDike) and (ReadCell.ElevDikes)  //elevation will be set to dike height.

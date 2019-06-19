@@ -937,18 +937,21 @@ Var TotErosion: Double;
     EdgeFound: Boolean;
     CatWidth, ErosionLossMeters: Double;
 
+    {-------------------------------------------------------------------------------------------------}
     Procedure AddToWidth;
     Var AC: CompressedCell; {Adjacent Offshore Cell}
     Begin
        RetA(AdjRow,AdjCol,AC);
 
-       If CellWidth(@AC,Clss)>0
+       If CellWidth(@AC,Clss)>0.01 {1cm}
          then WidthErodedOS := WidthErodedOS + CellWidth(@AC,Clss)
          else EdgeFound := True;
 
-       If EdgeFound and not(GetBit(MostlyWater,AdjRow,AdjCol)) then WidthErodedOS := 1e6;  {not adjacent to water, no erosion, 1/13/2010}
-       WidthErodedOS := WidthErodedOS + ErodeMatrix[Site.RunCols*(AdjRow)+(AdjCol)];  // acount for class already lost from previous calculation
+       If EdgeFound and not((GetBit(MostlyWater,AdjRow,AdjCol)) or (GetCellCat(@AC) = Categories.EstuarineWater)) then WidthErodedOS := 1e6;  {not adjacent to water, no erosion, modified 6/16/2019}
+       WidthErodedOS := WidthErodedOS + (0.01 * ErodeMatrix[Site.RunCols*(AdjRow)+(AdjCol)]);  // account for erosion that already occurred here this time step
+         {m}                  {m}       {m/cm}      {cm}
     End;
+    {-------------------------------------------------------------------------------------------------}
 
 Begin
   Frac_To_Erode := 0;
@@ -981,8 +984,11 @@ Begin
     then Cell.BTFErosionLoss := Cell.BTFErosionLoss + ErosionLossMeters
     else Cell.ErosionLoss := Cell.ErosionLoss + ErosionLossMeters;
 
-  If Trunc(TotErosion-WidthErodedOS) > ErodeMatrix[Site.RunCols*(EachRow)+(EachCol)] then        {Keep track of the erosion at this cell in this time-step thus far}
-    ErodeMatrix[Site.RunCols*(EachRow)+(EachCol)] := Trunc(TotErosion-WidthErodedOS);
+  If ErosionLossMeters > (ErodeMatrix[Site.RunCols*(EachRow)+(EachCol)]*100) then        {Keep track of the erosion at this cell in this time-step thus far}
+        {m}                 {cm}                                       {cm/m}
+    ErodeMatrix[Site.RunCols*(EachRow)+(EachCol)] := Trunc(ErosionLossMeters*100);       {JSC Track cell erosion in cm for more accuracy 6/13/2019}
+       {cm}
+
 End;
 
 {*******************************************}
@@ -1117,8 +1123,13 @@ PROCEDURE TestAdjacent(Cell: PCompressedCell; Row, Col: Integer);
                 RetA(NewRow, NewCol, C2);
                 If (C2.MaxFetch > AdjMaxFetch) then AdjMaxFetch := C2.MaxFetch;   {Two immediately adjacent cells are tested}
               end
-            else If (MaxFetchArr[(Site.RunCols*Row)+EachCol]*0.001  > AdjMaxFetch) then AdjMaxFetch := MaxFetchArr[(Site.RunCols*Row)+EachCol]*0.001;
-        End;                                {m}            {m/km}     {km}              {km}           {m}                                 {m/km}
+          else If (MaxFetchArr[(Site.RunCols*NewRow)+NewCol]*0.001 > AdjMaxFetch) then
+                                             {m}             {km/m}     {km}
+            Begin
+               AdjMaxFetch := MaxFetchArr[(Site.RunCols*NewRow)+NewCol]*0.001;
+                  {km}           {m}                                    {km/m}
+            End;
+        End;
     End;
   END; {Adj}
 

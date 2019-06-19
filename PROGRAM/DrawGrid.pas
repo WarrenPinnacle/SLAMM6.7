@@ -147,7 +147,7 @@ type
     ExtractDataShpButton: TButton;
     Panel8: TPanel;
     Label3: TLabel;
-    SVOGISReadWrite3: TSVOGISReadWrite;
+//    SVOGISReadWrite3: TSVOGISReadWrite;
     procedure ViewLegButtClick(Sender: TObject);
     procedure HaltButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -5170,8 +5170,8 @@ Var
   StudyXMin, StudyXMax, StudyYMin, StudyYMax, Rnscale: Double;
   RnRows: Integer;
 
-  DMTPolyShape3: TSVOPolygonShape;
-  DataPoints3: TSVOShapePointArray;
+//  DMTPolyShape3: TSVOPolygonShape;
+//  DataPoints3: TSVOShapePointArray;
 
 
   Function StudyX(indx: Integer): Double;
@@ -5250,7 +5250,7 @@ begin
   ProgForm.Cleanup;
   ExtractDataShpButton.Enabled := True;
 
-  // FIXME hubba hubba
+(*  // code for Casco Bay dry-land buffer processing
 
   ShowMessage('Now please select the dry-land buffer shapefile');
 
@@ -5316,7 +5316,7 @@ begin
 
   ProgForm.Cleanup;
   ExtractDataShpButton.Enabled := True;
-
+                     *)
   {}
 end;
 
@@ -5446,8 +5446,9 @@ var
   FlatIndex: LongInt;
   NonFrag, EdgeDens, Perimeter, ShapeX, ShapeY, MWid, WetlandArea: Double;
   DMTPolyShape: TSVOPolygonShape;
-  DMTPolyShape3: TSVOPolygonShape;
-  CellPolys2: Array of CellPolyRec;
+
+//  DMTPolyShape3: TSVOPolygonShape;
+//  CellPolys2: Array of CellPolyRec;
 
   SIF: TSLAMMInputFile;
   ReadOK: Boolean;
@@ -5519,7 +5520,7 @@ begin
   // Make visible progress bar and messages
   ProgForm.Setup('Locating cells in shapefiles','','','',False);
 
-   // Store which cells belong to which polygons
+(*   // Store which cells belong to which polygons
     With SS.Site do Setlength(CellPolys,RunRows*RunCols);
     for ER := 0 to SS.Site.RunRows-1 do
       for EC := 0 to SS.Site.RunCols-1 do
@@ -5547,38 +5548,7 @@ begin
                   ShapeIndexes[nshapes-1] := i;
                 End;
             End;
-        End;
-
-   // Store which cells belong to which polygons
-    With SS.Site do Setlength(CellPolys2,RunRows*RunCols);
-    for ER := 0 to SS.Site.RunRows-1 do
-      for EC := 0 to SS.Site.RunCols-1 do
-        begin
-          ProgForm.Update2Gages(Trunc(100*(ER/SS.Site.RunRows)),0);
-          FlatIndex := (SS.Site.RunCols*ER)+EC;
-          CellPolys2[FlatIndex].nshapes := 0;
-          CellPolys2[FlatIndex].ShapeIndexes := nil;
-
-          With SS.Site do
-            Begin
-              ShapeX  := ((EC+0.5) * RunScale) + LLXCorner;
-              ShapeY  := -(RunScale*(ER+0.5-RunRows)) + LLYCorner;
-            End;
-
-          For i := 0 to DMMTShapeList3.Count-1 do
-            Begin
-              DMTPolyShape :=  TSVOPolygonShape(DMMTShapeList.Items[i]);
-              If DMTPolyShape.PointInPolygon(ShapeX,ShapeY) then
-               with CellPolys3[FlatIndex] do
-                Begin
-                  Inc(nshapes);
-                  If Length(shapeindexes)< nshapes
-                     then SetLength(shapeindexes,nshapes*2);
-                  ShapeIndexes[nshapes-1] := i;
-                End;
-            End;
-        End;
-
+        End; *)
 
   SetLength(WetlandCells,N_GISYears);
   With SS.Site do SetLength(CatMap,RunRows * RunCols);
@@ -5636,20 +5606,27 @@ begin
                      End;
 
                    For shp := 0 to nshapes-1 do
+
                      Begin
                        Inc(WetlandCells[i,ShapeIndexes[shp],CatMap[FlatIndex]]);
-                       WetlandCells[i,ShapeIndexes[shp],TotNWetland-2] := WetlandCells[i,ShapeIndexes[shp],TotNWetland-2] + MWI;  // marsh water interface count
-                       WetlandCells[i,ShapeIndexes[shp],TotNWetland-3] := WetlandCells[i,ShapeIndexes[shp],TotNWetland-3] + NPerimeter; // marsh perimter count
+                       WetlandCells[i,ShapeIndexes[shp],TotNWetland] := WetlandCells[i,ShapeIndexes[shp],TotNWetland] + MWI;  // marsh water interface count
+                       WetlandCells[i,ShapeIndexes[shp],TotNWetland-1] := WetlandCells[i,ShapeIndexes[shp],TotNWetland-1] + NPerimeter; // marsh perimter count
                      End;
+
+//                     Begin
+//                       Inc(WetlandCells[i,ShapeIndexes[shp],CatMap[FlatIndex]]);
+//                       WetlandCells[i,ShapeIndexes[shp],TotNWetland-2] := WetlandCells[i,ShapeIndexes[shp],TotNWetland-2] + MWI;  // marsh water interface count
+//                       WetlandCells[i,ShapeIndexes[shp],TotNWetland-3] := WetlandCells[i,ShapeIndexes[shp],TotNWetland-3] + NPerimeter; // marsh perimter count
+//                     End;
 
                  End; // nshapes > 0 and cat>0
 
-               If (CatMap2[FlatIndex]>0) and (nshapes > 0) then
+(*               If (CatMap2[FlatIndex]>0) and (nshapes > 0) then
                  Begin
                    If CatMap2[FlatIndex] in [1,2] then
                       Inc(WetlandCells[i,ShapeIndexes[shp],TotNWetland-1]);  // dry land in buffer count
                       if i=0 then Inc(WetlandCells[i,ShapeIndexes[shp],TotNWetland-1]);  // TZero dry land in buffer count
-                 End;
+                 End; *)
 
              End; // ER, EC
 
@@ -5672,11 +5649,18 @@ begin
        For c:=NWetland+1 to NWetland+NDucksWetland do
          Write(Outfile,',',floattostrf(WetlandCells[i,shp,c]*Sqr(SS.Site.RunScale)/10000,ffgeneral,8,4)); // ha
 
-       Write(Outfile,',',floattostrf(WetlandCells[i,shp,TotNWetland-2]*SS.Site.RunScale,ffgeneral,8,4)); // Marsh to OW interface in meters
+       Write(Outfile,',',floattostrf(WetlandCells[i,shp,TotNWetland]*SS.Site.RunScale,ffgeneral,8,4)); // Marsh to OW interface in meters
                                                {count}                          {m}
 
-       Perimeter := WetlandCells[i,shp,TotNWetland-3]*SS.Site.RunScale; // Marsh Perimeter in meters
+       Perimeter := WetlandCells[i,shp,TotNWetland-1]*SS.Site.RunScale; // Marsh Perimeter in meters
                                {count}                          {m}
+
+//       Write(Outfile,',',floattostrf(WetlandCells[i,shp,TotNWetland-2]*SS.Site.RunScale,ffgeneral,8,4)); // Marsh to OW interface in meters
+                                               {count}                          {m}
+
+//       Perimeter := WetlandCells[i,shp,TotNWetland-3]*SS.Site.RunScale; // Marsh Perimeter in meters
+                               {count}                          {m}
+
        WetlandArea := 0;
        z := 8;  WetlandArea := WetlandArea + WetlandCells[i,shp,z]*Sqr(SS.Site.RunScale);  //r.f.m
        z := 9;  WetlandArea := WetlandArea + WetlandCells[i,shp,z]*Sqr(SS.Site.RunScale);  //mangrove
@@ -5702,8 +5686,8 @@ begin
           Write(Outfile,',',floattostrf(MWid,ffgeneral,8,4));
         End;
 
-        Write(Outfile,',',floattostrf(WetlandCells[i,shp,TotNWetland-1]*Sqr(SS.Site.RunScale)/10000,ffgeneral,8,4)); // ha
-        Write(Outfile,',',floattostrf(WetlandCells[i,shp,TotNWetland-1]/floattostrf(WetlandCells[i,shp,TotNWetland],ffgeneral,8,4)); // fraction of t-zero
+//        Write(Outfile,',',floattostrf(WetlandCells[i,shp,TotNWetland-1]*Sqr(SS.Site.RunScale)/10000,ffgeneral,8,4)); // ha
+//        Write(Outfile,',',floattostrf(WetlandCells[i,shp,TotNWetland-1]/floattostrf(WetlandCells[i,shp,TotNWetland],ffgeneral,8,4)); // fraction of t-zero
 
        Writeln(OutFile);
      End;   //i to NGIS_Years
