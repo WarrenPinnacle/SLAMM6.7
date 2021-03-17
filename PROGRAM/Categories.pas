@@ -617,7 +617,7 @@ begin
       If i in [13,19,14] then Cats[i].UseWaveErosion := True;
 
       If i = 19        then Cats[i].AccrModel := RegFM;
-      If i in [14,15]  then Cats[i].AccrModel := IrregFM;
+      If i in [14,15]  then Cats[i].AccrModel := IrregFM ;
       If i in [18,21]  then Cats[i].AccrModel := BeachTF;
       If i = 13        then Cats[i].AccrModel := TidalFM;
       If i in [7,8]    then Cats[i].AccrModel := InlandM;

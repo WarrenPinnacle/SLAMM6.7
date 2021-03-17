@@ -98,7 +98,7 @@ Begin
 
   Cat := Blank;
   CatFound := False;
-  For i := 0 to SS.Categories.NCats -1 do
+  For i :=  SS.Categories.NCats -1 downto 0 do
    If Not CatFound then
      Begin
       Case MarshBox.ItemIndex of
