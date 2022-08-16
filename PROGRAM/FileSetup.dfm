@@ -49,9 +49,9 @@ object FileSetupForm: TFileSetupForm
   object Label4: TLabel
     Left = 40
     Top = 249
-    Width = 98
+    Width = 96
     Height = 13
-    Caption = 'Pct. Impervious File:'
+    Caption = 'Shoreline Protection'
   end
   object Label5: TLabel
     Left = 20

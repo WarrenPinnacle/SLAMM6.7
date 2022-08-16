@@ -559,6 +559,8 @@ begin
 end;
 
 
+
+
 Function TSLAMM_Simulation.ThreadUpdateElevs(StartRow,EndRow: Integer; PRunThread: Pointer):Boolean;
 
 Var ER, EC, i, fw, nfw: Integer;
@@ -1046,6 +1048,8 @@ Var i: Integer;
     ERate: Double;
     TC: TCategory;
 Begin
+  if (Cl.Prot_Num > 0) then exit;
+
   For i := 1 to NUM_CAT_COMPRESS do
     If (Cl.Widths[i] > tiny) and (Cl.Cats[i] <> Blank) then
       Begin
@@ -1614,7 +1618,7 @@ Var ER, EC: Integer;
     Procedure CalculateWavePower;
     Var AvgDepthMTL, AvgDepth, QTU: Double;
         i: Integer;
-        WD, WS, Tides: Integer;
+        WD, WS, Tides, MaxSearch: Integer;
         WaterLevel: Double;
         WindSpeed, Fetch, NWD, NDF, A1, B1, NWE, WE, {WEH,} A2, B2, NDWF, WF, WP, G, F, WLen, WCel, WNum, WGC, Pw, Pi_W : Double;
         TotalPower: Double; // Whr
@@ -1695,9 +1699,10 @@ Var ER, EC: Integer;
          Begin
            If FetchIndex>2 then
              Begin
-               For i:= 0 to Trunc(FetchIndex/3) do  // average first third only;
+               MaxSearch := min(Trunc(FetchIndex/3),(Round(7000/Site.RunScale)-1))  ;
+               For i:= 0 to MaxSearch do  // average first third only;
                  AvgDepthMTL := AvgDepthMTL - FetchDepths[i]; // convert negative elevation relative to MTL to positive
-               AvgDepthMTL := (AvgDepthMTL / Trunc(FetchIndex/3)) // calculate average of first third of fetch
+               AvgDepthMTL := (AvgDepthMTL / MaxSearch) // calculate average of first third of fetch (or 7km)
              End;
          End
        else AvgDepthMTL := SubS.WE_Avg_Shallow_Depth;  // no bathymetry, use entered meters below MTL

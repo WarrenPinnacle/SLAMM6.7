@@ -427,7 +427,8 @@ TYPE
              ErosionLoss, BTFErosionLoss: Single;
              MTLminusNAVD: single; {mtl minus navd88 for output/utility purposes}
              D2MLLW, D2MHHW, ProbSAV, D2Mouth : Single;  // Added D2Mouth - Marco
-             ImpCoeff : Integer;
+             PROT_Num : Integer;
+//             ImpCoeff : Integer;
              SubsiteIndex: SmallInt;   // save subsite index to speed execution
 
              Pw, WPErosion: Single;  // wave power aggregated over whole year, wave power erosion m/y
@@ -521,7 +522,7 @@ uses System.UITypes;
     var SystemInfo: _SYSTEM_INFO;
     begin
         GetSystemInfo(SystemInfo);
-        Result := SystemInfo.dwNumberOfProcessors;         //Parallel programming
+        Result := SystemInfo.dwNumberOfProcessors;         //Parallel programming, to turn off set to 1
     end;
 
     Function CharOccurs(const str: string; c: char): integer;

@@ -362,6 +362,8 @@ TYPE
      Procedure Smooth_XS_Salinity;
      Procedure ClearFlowGeometry;
      Function CalculateEucDistances: Boolean;
+     Function ThreadCalcEucDistances(StartRow,EndRow: Integer;PRunThread: Pointer):Boolean;
+
      Function CalculateProbSAV(ShowMsg:Boolean): Boolean;
 end;
 
@@ -446,7 +448,8 @@ Begin
   C.D2Mouth := -9999;
 
    C.SubSiteIndex := -9999;
-   C.ImpCoeff := -9999;
+//   C.ImpCoeff := -9999;
+   C.Prot_Num := 0;
 
   C.Pw := -9999;
   C.WPErosion := 0;
@@ -513,10 +516,13 @@ END;
 
 {-----------------------------------------------------------------------------------}
 
-Procedure TSLAMM_Simulation.SaveRaster(FileN: String; rasterType: Integer);  {raster Type 1 = Dikes, Raster Type 2 = NWI, Type 3 = Elevations, else Raster-subsites  }
+Procedure TSLAMM_Simulation.SaveRaster(FileN: String; rasterType: Integer);
+{raster Type 1 = Dikes, 2 = NWI,     3 = Elevations, 4 = Raster-subsites
+             5 = Inund, 6 = D2MLLW   7 = D2MHHW }
+
 Var CatInt, RowLoop,ColLoop : Integer;
     Current_Cell            : CompressedCell;
-    Elev, SlopeAdjustment   : Double;
+    Elev, SlopeAdjustment, GT   : Double;
     TOD                     : TOpenDialog;
     SSIndex, InundOut : integer;
     SOF: TSLAMMOutputFile;
@@ -551,13 +557,13 @@ Begin
   ProgForm.HaltButton.Visible := True;
 
   {Write EACH CELL}
-     For RowLoop := 0 {(Site.RunRows Div 2) -1 } to Site.RunRows-1 do  //commented out slices in half
+     For RowLoop := 0 { (Site.RunRows Div 2) -1 } to Site.RunRows-1 do  //commented out slices in half
       Begin
        For ColLoop:= 0 to Site.RunCols-1 do
          Begin
-            If ColLoop=1 then If Not ProgForm.Update2Gages(Trunc((RowLoop)/Site.RunRows*(100)),0) then Break;  {break out of loop and close file}
+            If ColLoop=1 then If Not ProgForm.Update2Gages(Trunc((RowLoop)/Site.RunRows*(100)),0) then Break;  {break out of loop and close file on user exit}
             LastNumber := (RowLoop=Site.RunRows-1) and (ColLoop=Site.RunCols-1);
-            If rasterType < 4 then RetA( RowLoop, ColLoop, Current_Cell);
+            If (rasterType < 4) or (rastertype > 5) then RetA( RowLoop, ColLoop, Current_Cell);
             case rasterType of
               1:
                 Begin
@@ -606,13 +612,24 @@ Begin
               4: //INPUT SUBSITE RASTER
                 begin
                  SSIndex := Site.GetSubSiteNum(ColLoop,RowLoop);
-                 SOF.WriteNextNumber(SSIndex,LastNumber);
+                 if SSIndex = 0 then GT := Site.GlobalSite.GTideRange
+                                else GT := Site.SubSites[SSIndex-1].GTideRange;
+                 SOF.WriteNextNumber(GT,LastNumber);
 
                 end;
               5: //INUNDATION RASTER
                 begin
                     InundOut := TranslateInundNum(Inund_Arr[(Site.RunCols*RowLoop)+ColLoop]);
                     SOF.WriteNextNumber(InundOut,LastNumber);
+                end;
+              6: //MLLW
+                begin
+                    SOF.WriteNextNumber(Current_Cell.D2MLLW,LastNumber);
+                end;
+
+              7: //MHHW
+                begin
+                    SOF.WriteNextNumber(Current_Cell.D2MHHW,LastNumber);
                 end;
 
             end; {case}
@@ -1528,7 +1545,7 @@ Var DikOnly: Boolean;
     AddToMap: Boolean;
     Neg_Num: Integer;
     LandMovement: Double;
-    PCT_IMP, NWI_Number, ROS_Number: Integer;
+    PROT_Number, PCT_IMP, NWI_Number, ROS_Number: Integer;
     Sal_Number: single;
     Elev_Number, Slope_Number, Dik_Number, Storm_Num1, Storm_Num2: double;  {elevation in meters, slope in degrees, storm elevation in meters}
     TotalWidth, SlopeAdjustment: double;
@@ -1604,7 +1621,7 @@ Var DikOnly: Boolean;
                      If AvgCell.ElevDikes then ReadCell.ElevDikes := True;
 
   {avg salin}        ReadCell.Sal[1] := ((ReadCell.Sal[1] * k) + (AvgCell.Sal[1]))/(k+1);  // running weighted average
-  {avg Imperv}       ReadCell.ImpCoeff := Round( ((ReadCell.ImpCoeff * k) + (AvgCell.ImpCoeff))/(k+1) );  // running weighted average
+//   {avg Imperv}       ReadCell.ImpCoeff := Round( ((ReadCell.ImpCoeff * k) + (AvgCell.ImpCoeff))/(k+1) );  // running weighted average  FIXME
   {avg MTL }         ReadCell.MTLminusNAVD := ((ReadCell.MTLminusNAVD * k) + (AvgCell.MTLminusNAVD))/(k+1);  // running weighted average
   {avg uplift }      ReadCell.Uplift := ((ReadCell.Uplift * k) + (AvgCell.Uplift))/(k+1);  // running weighted average
   {avg D2Mouth }     ReadCell.D2Mouth := ((ReadCell.D2Mouth * k) + (AvgCell.D2Mouth))/(k+1);  // running weighted average
@@ -1956,11 +1973,14 @@ Begin  {MakeDataFile}
         //Read Impervious file if it exists
         if IMPFExists then
           begin
-            PCT_IMP := Trunc(GetNextNumber(IMPFile, ER, EC));
-            ReadCell.ImpCoeff := PCT_IMP;
+            PROT_Number := Trunc(GetNextNumber(IMPFile, ER, EC));
+            // PCT_IMP := Trunc(GetNextNumber(IMPFile, ER, EC));
+            // ReadCell.ImpCoeff := PCT_IMP;
 
-            IF (PCT_IMP >=0) and (NWI_Number = 1) or (NWI_Number = 2) then
-              If PCT_IMP > {0} {33 } 25 {15} {50} then NWI_Number := 1 else NWI_Number := 2;
+            ReadCell.PROT_Num := PROT_Number;
+
+            //IF (PCT_IMP >=0) and CAT.ISDRYLAND (NWI_Number = 1) or (NWI_Number = 2) then          // fixme make this general for all dry land based on categories.pas
+            //  If PCT_IMP > {0} {33 } 25 {15} {50} then NWI_Number := 1 else NWI_Number := 2;  // fixme make this general for developed dry land.
 
             //Czech Sparse - Wertheim fill
             //IF (PCT_IMP >=25) and (ROS_Number=2) and (Elev_Number=NO_DATA) and (NWI_Number=2)  then
@@ -2017,8 +2037,8 @@ Begin  {MakeDataFile}
         If (NWI_Number = NO_DATA) then NWI_Number := ORD(Blank)+1;
 
          //Dike attribute
-         //ReadCell.ProtDikes := (TRUNC(DIK_Number) <> NO_DATA) and ((DIK_Number > 0) or (DIK_Number=-5));
-         ReadCell.ProtDikes := (TRUNC(Dik_Number) <> NO_DATA) and (Dik_Number <> 0);
+         ReadCell.ProtDikes := (TRUNC(DIK_Number) <> NO_DATA) and ((DIK_Number > 0) or (DIK_Number=-5));
+         // ReadCell.ProtDikes := (TRUNC(Dik_Number) <> NO_DATA) and (Dik_Number <> 0);
          if (not ClassicDike) then
           begin
            ReadCell.ElevDikes := (TRUNC(DIK_Number) <> NO_DATA) and (DIK_Number > 0);

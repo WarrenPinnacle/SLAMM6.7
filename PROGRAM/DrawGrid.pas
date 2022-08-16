@@ -131,11 +131,9 @@ type
     InputBox: TComboBox;
     ImportShp: TButton;
     OpenDialog1: TOpenDialog;
-    SVOGISReadWrite1: TSVOGISReadWrite;
     CalcInundation: TButton;
     InfDotSizeLabel: TLabel;
     InfDotSizeBox: TComboBox;
-    SVOGISReadWrite2: TSVOGISReadWrite;
     SaveDialog1: TSaveDialog;
     OmitT030: TButton;
     Gauge1: TGauge;
@@ -147,6 +145,7 @@ type
     ExtractDataShpButton: TButton;
     Panel8: TPanel;
     Label3: TLabel;
+    SaveMHHWMLLW: TButton;
 //    SVOGISReadWrite3: TSVOGISReadWrite;
     procedure ViewLegButtClick(Sender: TObject);
     procedure HaltButtonClick(Sender: TObject);
@@ -203,7 +202,7 @@ type
     procedure SaveElevationRasterClick(Sender: TObject);
     procedure SaveInundationButtonClick(Sender: TObject);
     procedure StopPausingButtonClick(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
+    procedure CombineDikes(Sender: TObject);
     procedure PanCheckBoxClick(Sender: TObject);
     procedure ScrollBox1MouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
@@ -220,6 +219,7 @@ type
     procedure EditWindsClick(Sender: TObject);
     procedure EditAlphaClick(Sender: TObject);
     procedure CalcWaveErosionClick(Sender: TObject);
+    procedure SaveMHHWMLLWClick(Sender: TObject);
   private
     { Private declarations }
     EditIndex,aX,aY,zX,zY,wd,ht : integer;
@@ -3005,7 +3005,7 @@ var
             If (SaveDialog1.FileName = OpenDialog1.Filename) then MessageDlg('Cannot Overwrite Original Shapefile.',mterror,[mbok],0);
           Until (SaveDialog1.FileName <> OpenDialog1.Filename);
 
-          SVOGISReadWrite2.FileType := sftShapeFile;
+{          SVOGISReadWrite2.FileType := sftShapeFile;
           SVOGISReadWrite2.ShapeList := OutShapeList;
 
           Application.ProcessMessages;
@@ -3016,7 +3016,7 @@ var
           SVOGISReadWrite2.WriteFile;
           ProgForm.Cleanup;
           Application.ProcessMessages;
-          WriteNewDBF(ChangeFileExt(SaveDialog1.FileName,'.dbf'));
+          WriteNewDBF(ChangeFileExt(SaveDialog1.FileName,'.dbf'));  FIXME }
 
           With TRI do
            If FileExists(ChangeFileExt(OpenDialog1.Filename,'.prj')) then
@@ -3089,17 +3089,17 @@ begin       {ImportRoadClick}
     End;
 
   { ------  Load Shape File --------}
-  SVOGISReadWrite1.FileType := sftShapeFile;
+  {SVOGISReadWrite1.FileType := sftShapeFile;
   ShapeList := TSVOShapeList.Create;
   SVOGISReadWrite1.ShapeList := ShapeList;
-  SVOGISReadWrite1.ImportFileName := OpenDialog1.Filename;
+  SVOGISReadWrite1.ImportFileName := OpenDialog1.Filename; FIXME}
 
   DBFFileN := ChangeFileExt(OpenDialog1.Filename,'.dbf');
   ReadDBFHeader;
 
   ProgForm.Setup('Reading Shape File','','','',False);
 
-  ErrNum := SVOGISReadWrite1.ReadFile;
+//  ErrNum := SVOGISReadWrite1.ReadFile;  fixme
   If ErrNum > 0 then
       Begin
         MessageDlg('Error Reading shape file '+ OpenDialog1.Filename,mterror,[mbOK],0);
@@ -3212,8 +3212,8 @@ begin       {ImportRoadClick}
   ShowEditItems;
   UpdateEditBox;
 
-  SVOGISReadWrite1.Active := False;
-  SVOGISReadWrite1.Shapelist.Destroy;
+{  SVOGISReadWrite1.Active := False;
+  SVOGISReadWrite1.Shapelist.Destroy;  FIXME}
 
   If TRI.NRoads>0 then OutputSegments;
 end;
@@ -3332,7 +3332,7 @@ var
             If (SaveDialog1.FileName = OpenDialog1.Filename) then MessageDlg('Cannot Overwrite Original Shapefile.',mterror,[mbok],0);
           Until (SaveDialog1.FileName <> OpenDialog1.Filename);
 
-          SVOGISReadWrite2.FileType := sftShapeFile;
+{          SVOGISReadWrite2.FileType := sftShapeFile;
           SVOGISReadWrite2.ShapeList := OutShapeList;
 
           Application.ProcessMessages;
@@ -3344,7 +3344,7 @@ var
           ProgForm.Cleanup;
           Application.ProcessMessages;
 
-          WriteNewDBF(ChangeFileExt(SaveDialog1.FileName,'.dbf'));
+          WriteNewDBF(ChangeFileExt(SaveDialog1.FileName,'.dbf')); FIXME}
 
           With TPI do
            If FileExists(ChangeFileExt(OpenDialog1.Filename,'.prj')) then
@@ -3379,7 +3379,7 @@ begin
 
   IF Not OpenDialog1.Execute THEN Exit;
 
-  IF OpenDialog1.FilterIndex = 1 Then SVOGISReadWrite1.FileType := sftShapeFile;
+{  IF OpenDialog1.FilterIndex = 1 Then SVOGISReadWrite1.FileType := sftShapeFile; fixme}
   IF OpenDialog1.FilterIndex = 2 Then
     Begin
       MessageDlg('Error, Infrastructure ShapeFile must be a "*.shp" shapefile',mterror,[mbOK],0);
@@ -3387,20 +3387,20 @@ begin
     End;
 
     ShapeList := TSVOShapeList.Create;
-    SVOGISReadWrite1.ShapeList := ShapeList;
-    SVOGISReadWrite1.ImportFileName := OpenDialog1.Filename;
+{    SVOGISReadWrite1.ShapeList := ShapeList;
+    SVOGISReadWrite1.ImportFileName := OpenDialog1.Filename; }
 
     DBFFileN := ChangeFileExt(OpenDialog1.Filename,'.dbf');
     ReadDBFHeader;
 
     ProgForm.Setup('Reading Shape File','','','',False);
 
-    ErrNum := SVOGISReadWrite1.ReadFile;
+{    ErrNum := SVOGISReadWrite1.ReadFile; }
     If ErrNum > 0 then
         Begin
           MessageDlg('Error Reading shape file '+ OpenDialog1.Filename,mterror,[mbOK],0);
-          SVOGISReadWrite1.Active := False;
-          SVOGISReadWrite1.Shapelist.Destroy;
+{          SVOGISReadWrite1.Active := False;
+          SVOGISReadWrite1.Shapelist.Destroy;}
           Exit;
         End;
 
@@ -3465,8 +3465,8 @@ begin
   ShowEditItems;
   UpdateEditBox;
 
-  SVOGISReadWrite1.Active := False;
-  SVOGISReadWrite1.Shapelist.Destroy;
+{  SVOGISReadWrite1.Active := False;
+  SVOGISReadWrite1.Shapelist.Destroy; }
 
   If (TPI.NPoints>0) then OutputPoints;
 
@@ -3535,12 +3535,18 @@ begin
             SetCellWidth(@CL,-99,0);  {loss first to minimize data loss due to compression}
 
             //Set cell coverage to Dry Land
-            if (CL.ImpCoeff> 25) and (DevDryLand<>-99) then
+{            if (CL.ImpCoeff> 25) and (DevDryLand<>-99) then
               begin
                 SetCellWidth(@CL,devdryland,gridscale);
                 SetCatElev(@CL,devdryland,CE);
               end
             else
+            if (CL.ImpCoeff> 25) and (DevDryLand<>-99) then
+              begin                                             FIXME REENABLE WITH IMPCOEFF.  Why is this repeated?
+                SetCellWidth(@CL,devdryland,gridscale);
+                SetCatElev(@CL,devdryland,CE);
+              end
+            else }
               begin
                 SetCellWidth(@CL,unddryland,gridscale);
                 SetCatElev(@CL,unddryland,CE);
@@ -3800,6 +3806,22 @@ end;
 
 
 
+procedure TGridForm.SaveMHHWMLLWClick(Sender: TObject);
+var
+  pName2, pName: String;
+begin
+  if not PromptforFileName(pName,'ASC Files (*.ASC)|*.ASC','','Save your grid file','',True) then exit;
+
+  SS.CalculateEucDistances;
+
+  pName2 := ChangeFileExt(pName,'MHHW.ASC');
+  SS.SaveRaster(pName2,7);
+
+  pName2 := ChangeFileExt(pName,'MLLW.ASC');
+  SS.SaveRaster(pName2,6);
+
+end;
+
 procedure TGridForm.SaveSubsiteRasterClick(Sender: TObject);
 var
   pName: String;
@@ -3807,7 +3829,7 @@ begin
     if PromptforFileName(pName,'ASC Files (*.ASC)|*.ASC','','Save your grid file','',True) then
       begin
         pName := ChangeFileExt(pName,'.ASC');
-        SS.SaveRaster(pName,4 );
+        SS.SaveRaster(pName,4);
       end;
 end;
 
@@ -4217,7 +4239,7 @@ begin
     End;
 end;
 
-procedure TGridForm.Button3Click(Sender: TObject);
+procedure TGridForm.CombineDikes(Sender: TObject);
 // Combine dikes - classic and with elevation using the uplift file
 var
  ER, EC: integer;
@@ -5189,15 +5211,15 @@ Var
 begin
   IF Not OpenDialog1.Execute THEN Exit;
 
-  IF OpenDialog1.FilterIndex = 1 Then SVOGISReadWrite1.FileType := sftShapeFile;
-  IF OpenDialog1.FilterIndex = 2 Then
+{  IF OpenDialog1.FilterIndex = 1 Then SVOGISReadWrite1.FileType := sftShapeFile;
+  IF OpenDialog1.FilterIndex = 2 Then }
     Begin
       MessageDlg('Error, areas to process for the DMT must be a "*.shp" shapefile',mterror,[mbOK],0);
       Exit;
     End;
 
     DMMTShapeList := TSVOShapeList.Create;
-    SVOGISReadWrite1.ShapeList := DMMTShapeList;
+{    SVOGISReadWrite1.ShapeList := DMMTShapeList;
     SVOGISReadWrite1.ImportFileName := OpenDialog1.Filename;
 
     ProgForm.Setup('Reading Shape File','','','',False);
@@ -5209,7 +5231,7 @@ begin
           SVOGISReadWrite1.Active := False;
           SVOGISReadWrite1.Shapelist.Destroy;
           Exit;
-        End;
+        End; }
 
     OpenDialog1.InitialDir := ExtractFileDir(OpenDialog1.FileName);  // set directory for next time
 
