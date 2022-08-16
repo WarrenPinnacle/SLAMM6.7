@@ -827,6 +827,7 @@ Procedure ConvertCellbySalinity(Cell: PCompressedCell);
 Var Cat: Integer;
     nrules, i, j, convnum: Integer;
     TSR: TSalinityRule;
+    TSRS: TSalinityRules;
     CellSal: Double;
     //NumSalMetrics: integer;
 Begin
@@ -838,7 +839,7 @@ Begin
      Begin
        Cat := Cell.Cats[i];
        nrules := 0;
-       If Categories.GetCat(Cat).SalRules then nrules := Categories.GetCat(Cat).SalinityRules.NRules;
+       If Categories.GetCat(Cat).HasSalRules then nrules := Categories.GetCat(Cat).SalinityRules.NRules;
        for j  := 0 to nrules-1 do
          Begin
            TSR := Categories.GetCat(Cat).SalinityRules.Rules[j];    // Handle case of multiple salinity rules
@@ -860,7 +861,9 @@ Begin
                      FracLost[Cat] := 1.0;
                      Convert(Cell,Cat,TSR.ToCat,-99);
                      Cat := TSR.ToCat;                     // Allow for second category change
-                     TSR := Categories.GetCat(Cat).SalinityRules.Rules[0];     // Allow for second category change
+                     TSRS := Categories.GetCat(Cat).SalinityRules;
+                     if TSRS = nil then TSR := nil
+                                   else TSR := TSRS.Rules[0];     // Allow for second category change
                    end;
              End; {TSR <>nil}
          End;

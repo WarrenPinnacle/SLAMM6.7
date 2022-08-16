@@ -3893,6 +3893,7 @@ Var Prot_Scenario: ProtScenario;
                            {Execute a single iteration of SLAMM}
    Var  i,j : Integer;
         MR: TModalResult;
+        Catg: TCategory;
    BEGIN
      SaveSubsites;
      DikeLogInit := False;
@@ -3902,7 +3903,27 @@ Var Prot_Scenario: ProtScenario;
      Result := CheckValidSLAMM;
      If Not Result then Begin UserStop := True; RestoreSubSites; Exit; End;
 
-
+     if (SalRules.NRules > 0)  then  // 8/15/22 JSC Copy SalRules to Category as required
+       Begin
+         for i := 0 to Categories.NCats-1 do
+           Begin
+             if Categories.Cats[i].SalinityRules = nil then
+               Begin
+                 Categories.Cats[i].SalinityRules.Free;
+                 Categories.Cats[i].SalinityRules := nil;
+               End;
+              Categories.Cats[i].HasSalRules := False;
+            End;
+         for i := 1 to SalRules.NRules do
+           Begin
+             Catg := Categories.Cats[SalRules.Rules[i-1].FromCat];
+             if Categories.Cats[i].SalinityRules = nil then Catg.SalinityRules := TSalinityRules.Create;
+             inc(CatG.SalinityRules.NRules);
+             if (Length(CatG.SalinityRules.Rules) < CatG.SalinityRules.NRules) then setlength(CatG.SalinityRules.Rules,CatG.SalinityRules.NRules+2);
+             CatG.HasSalRules := True;
+             CatG.SalinityRules.Rules[CatG.SalinityRules.NRules-1] := SalRules.Rules[i-1];
+           End;
+       End;
 
      //Delete SAV maps options from the gridform.graphbox
      GridForm.GraphBox.Items.Delete(14);
