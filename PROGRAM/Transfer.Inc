@@ -825,6 +825,7 @@ Procedure ConvertCellbySalinity(Cell: PCompressedCell);
 Var Cat: Integer;
     nrules, i, j, convnum: Integer;
     TSR: TSalinityRule;
+    TSRS: TSalinityRules;
     CellSal: Double;
     //NumSalMetrics: integer;
 Begin
@@ -836,7 +837,7 @@ Begin
      Begin
        Cat := Cell.Cats[i];
        nrules := 0;
-       If Categories.GetCat(Cat).SalRules then nrules := Categories.GetCat(Cat).SalinityRules.NRules;
+       If Categories.GetCat(Cat).HasSalRules then nrules := Categories.GetCat(Cat).SalinityRules.NRules;
        for j  := 0 to nrules-1 do
          Begin
            TSR := Categories.GetCat(Cat).SalinityRules.Rules[j];    // Handle case of multiple salinity rules
@@ -858,7 +859,9 @@ Begin
                      FracLost[Cat] := 1.0;
                      Convert(Cell,Cat,TSR.ToCat,-99);
                      Cat := TSR.ToCat;                     // Allow for second category change
-                     TSR := Categories.GetCat(Cat).SalinityRules.Rules[0];     // Allow for second category change
+                     TSRS := Categories.GetCat(Cat).SalinityRules;
+                     if TSRS = nil then TSR := nil
+                                   else TSR := TSRS.Rules[0];     // Allow for second category change
                    end;
              End; {TSR <>nil}
          End;
@@ -1614,7 +1617,7 @@ Var ER, EC: Integer;
     Procedure CalculateWavePower;
     Var AvgDepthMTL, AvgDepth, QTU: Double;
         i: Integer;
-        WD, WS, Tides: Integer;
+        WD, WS, Tides, MaxSearch: Integer;
         WaterLevel: Double;
         WindSpeed, Fetch, NWD, NDF, A1, B1, NWE, WE, {WEH,} A2, B2, NDWF, WF, WP, G, F, WLen, WCel, WNum, WGC, Pw, Pi_W : Double;
         TotalPower: Double; // Whr
@@ -1695,9 +1698,10 @@ Var ER, EC: Integer;
          Begin
            If FetchIndex>2 then
              Begin
-               For i:= 0 to Trunc(FetchIndex/3) do  // average first third only;
+               MaxSearch := min(Trunc(FetchIndex/3),(Round(7000/Site.RunScale)-1))  ;
+               For i:= 0 to MaxSearch do  // average first third only;
                  AvgDepthMTL := AvgDepthMTL - FetchDepths[i]; // convert negative elevation relative to MTL to positive
-               AvgDepthMTL := (AvgDepthMTL / Trunc(FetchIndex/3)) // calculate average of first third of fetch
+               AvgDepthMTL := (AvgDepthMTL / MaxSearch) // calculate average of first third of fetch (or 7km)
              End;
          End
        else AvgDepthMTL := SubS.WE_Avg_Shallow_Depth;  // no bathymetry, use entered meters below MTL

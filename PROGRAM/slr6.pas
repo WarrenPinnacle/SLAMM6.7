@@ -362,6 +362,8 @@ TYPE
      Procedure Smooth_XS_Salinity;
      Procedure ClearFlowGeometry;
      Function CalculateEucDistances: Boolean;
+     Function ThreadCalcEucDistances(StartRow,EndRow: Integer;PRunThread: Pointer):Boolean;
+
      Function CalculateProbSAV(ShowMsg:Boolean): Boolean;
 end;
 
@@ -513,10 +515,13 @@ END;
 
 {-----------------------------------------------------------------------------------}
 
-Procedure TSLAMM_Simulation.SaveRaster(FileN: String; rasterType: Integer);  {raster Type 1 = Dikes, Raster Type 2 = NWI, Type 3 = Elevations, else Raster-subsites  }
+Procedure TSLAMM_Simulation.SaveRaster(FileN: String; rasterType: Integer);
+{raster Type 1 = Dikes, 2 = NWI,     3 = Elevations, 4 = Raster-subsites
+             5 = Inund, 6 = D2MLLW   7 = D2MHHW }
+
 Var CatInt, RowLoop,ColLoop : Integer;
     Current_Cell            : CompressedCell;
-    Elev, SlopeAdjustment   : Double;
+    Elev, SlopeAdjustment, GT   : Double;
     TOD                     : TOpenDialog;
     SSIndex, InundOut : integer;
     SOF: TSLAMMOutputFile;
@@ -551,13 +556,13 @@ Begin
   ProgForm.HaltButton.Visible := True;
 
   {Write EACH CELL}
-     For RowLoop := 0 {(Site.RunRows Div 2) -1 } to Site.RunRows-1 do  //commented out slices in half
+     For RowLoop := 0 { (Site.RunRows Div 2) -1 } to Site.RunRows-1 do  //commented out slices in half
       Begin
        For ColLoop:= 0 to Site.RunCols-1 do
          Begin
-            If ColLoop=1 then If Not ProgForm.Update2Gages(Trunc((RowLoop)/Site.RunRows*(100)),0) then Break;  {break out of loop and close file}
+            If ColLoop=1 then If Not ProgForm.Update2Gages(Trunc((RowLoop)/Site.RunRows*(100)),0) then Break;  {break out of loop and close file on user exit}
             LastNumber := (RowLoop=Site.RunRows-1) and (ColLoop=Site.RunCols-1);
-            If rasterType < 4 then RetA( RowLoop, ColLoop, Current_Cell);
+            If (rasterType < 4) or (rastertype > 5) then RetA( RowLoop, ColLoop, Current_Cell);
             case rasterType of
               1:
                 Begin
@@ -606,13 +611,24 @@ Begin
               4: //INPUT SUBSITE RASTER
                 begin
                  SSIndex := Site.GetSubSiteNum(ColLoop,RowLoop);
-                 SOF.WriteNextNumber(SSIndex,LastNumber);
+                 if SSIndex = 0 then GT := Site.GlobalSite.GTideRange
+                                else GT := Site.SubSites[SSIndex-1].GTideRange;
+                 SOF.WriteNextNumber(GT,LastNumber);
 
                 end;
               5: //INUNDATION RASTER
                 begin
                     InundOut := TranslateInundNum(Inund_Arr[(Site.RunCols*RowLoop)+ColLoop]);
                     SOF.WriteNextNumber(InundOut,LastNumber);
+                end;
+              6: //MLLW
+                begin
+                    SOF.WriteNextNumber(Current_Cell.D2MLLW,LastNumber);
+                end;
+
+              7: //MHHW
+                begin
+                    SOF.WriteNextNumber(Current_Cell.D2MHHW,LastNumber);
                 end;
 
             end; {case}
@@ -1959,7 +1975,7 @@ Begin  {MakeDataFile}
             PCT_IMP := Trunc(GetNextNumber(IMPFile, ER, EC));
             ReadCell.ImpCoeff := PCT_IMP;
 
-            IF (PCT_IMP >=0) and (NWI_Number = 1) or (NWI_Number = 2) then
+            IF (PCT_IMP >=0) and (NWI_Number = 1) or (NWI_Number = 2) then   // fixme make this general for all dry land based on categories.pas
               If PCT_IMP > {0} {33 } 25 {15} {50} then NWI_Number := 1 else NWI_Number := 2;
 
             //Czech Sparse - Wertheim fill
@@ -3873,6 +3889,7 @@ Var Prot_Scenario: ProtScenario;
                            {Execute a single iteration of SLAMM}
    Var  i,j : Integer;
         MR: TModalResult;
+        Catg: TCategory;
    BEGIN
      SaveSubsites;
      DikeLogInit := False;
@@ -3882,7 +3899,27 @@ Var Prot_Scenario: ProtScenario;
      Result := CheckValidSLAMM;
      If Not Result then Begin UserStop := True; RestoreSubSites; Exit; End;
 
-
+     if (SalRules.NRules > 0)  then  // 8/15/22 JSC Copy SalRules to Category as required
+       Begin
+         for i := 0 to Categories.NCats-1 do
+           Begin
+             if Categories.Cats[i].SalinityRules = nil then
+               Begin
+                 Categories.Cats[i].SalinityRules.Free;
+                 Categories.Cats[i].SalinityRules := nil;
+               End;
+              Categories.Cats[i].HasSalRules := False;
+            End;
+         for i := 1 to SalRules.NRules do
+           Begin
+             Catg := Categories.Cats[SalRules.Rules[i-1].FromCat];
+             if Categories.Cats[i].SalinityRules = nil then Catg.SalinityRules := TSalinityRules.Create;
+             inc(CatG.SalinityRules.NRules);
+             if (Length(CatG.SalinityRules.Rules) < CatG.SalinityRules.NRules) then setlength(CatG.SalinityRules.Rules,CatG.SalinityRules.NRules+2);
+             CatG.HasSalRules := True;
+             CatG.SalinityRules.Rules[CatG.SalinityRules.NRules-1] := SalRules.Rules[i-1];
+           End;
+       End;
 
      //Delete SAV maps options from the gridform.graphbox
      GridForm.GraphBox.Items.Delete(14);

@@ -32,7 +32,7 @@ Type
       ElevDat   : ClassElev;  //low high bounds
       ElevationStats: packed array of TElevStats;
 
-      SalRules : Boolean;
+      HasSalRules : Boolean;
       SalinityRules : TSalinityRules;
       HasSalStats : Boolean;
       SalinityStats : TSalStats;
@@ -136,7 +136,7 @@ begin
     InundRules := nil;
     ErodeTo := -99;
     ElevationStats := nil;
-    SalRules := False;
+    HasSalRules := False;
     SalinityRules := nil;
     HasSalStats := False;
     For i := 1 to Num_Sal_Metrics do
@@ -382,8 +382,8 @@ begin
     For i := 0 to TSLAMM_Simulation(SS).NElevStats-1 do
      If not TSText then TS.Read(ElevationStats[i],16664);   // size prescribed for 32 & 64 bit compatibility
 
-  TSRead('SalRules',SalRules);
-  If SalRules then SalinityRules.Load(ReadVersionNum,TS);
+  TSRead('SalRules',HasSalRules);  // JSC 8/15/22 should not be loaded/stored, but kept for backward compatibility -- disregarded
+ //   If HasSalRules then SalinityRules.Load(ReadVersionNum,TS);  JSC 8/15/22 should not be loaded/stored
   TSRead('HasSalStats',HasSalStats);
   If HasSalStats then If not TSText then TS.Read(SalinityStats,Sizeof(SalinityStats));
 
@@ -441,8 +441,8 @@ begin
    For i:= 0 to TSLAMM_Simulation(PSS).NElevStats-1 do
     If not TSText then TS.Write(ElevationStats[i],16664);  // size prescribed for 32 & 64 bit compatibility
 
-  TSWrite('SalRules',SalRules);
-  If SalRules then SalinityRules.Store(TS);
+  TSWrite('SalRules',HasSalRules);   // JSC 8/15/22 should not be loaded/stored, but kept for backward compatibility -- disregarded
+ // If HasSalRules then SalinityRules.Store(TS);   //   If HasSalRules then SalinityRules.Load(ReadVersionNum,TS);  JSC 8/15/22 should not be loaded/stored
   TSWrite('HasSalStats',HasSalStats);
   If HasSalStats then If not TSText then TS.Write(SalinityStats,Sizeof(SalinityStats));
 
@@ -617,7 +617,7 @@ begin
       If i in [13,19,14] then Cats[i].UseWaveErosion := True;
 
       If i = 19        then Cats[i].AccrModel := RegFM;
-      If i in [14,15]  then Cats[i].AccrModel := IrregFM ;
+      If i in [14,15]  then Cats[i].AccrModel := IrregFM;
       If i in [18,21]  then Cats[i].AccrModel := BeachTF;
       If i = 13        then Cats[i].AccrModel := TidalFM;
       If i in [7,8]    then Cats[i].AccrModel := InlandM;

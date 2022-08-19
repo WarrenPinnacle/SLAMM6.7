@@ -12,8 +12,8 @@ Const OVERTOPHEIGHT : Array[0..20] of Double  = ( 9999, 1.7,  4.0, 9999, 2.6, 99
                                                {global}{dans} {nm} {ss3} {phipps} {global site included} {m above MTL}
 
 Const  VersionNum: Double = 6.991;   //used for file reading and writing   6.9905 threshold
-       VersStr  = '6.7.1 beta';
-       BuildStr = '6.7.0248';
+       VersStr  = '6.7.3 beta';
+       BuildStr = '6.7.0250';
 
 Const  Feet_Per_Meter = 3.28084;
 
@@ -521,7 +521,7 @@ uses System.UITypes;
     var SystemInfo: _SYSTEM_INFO;
     begin
         GetSystemInfo(SystemInfo);
-        Result := SystemInfo.dwNumberOfProcessors;         //Parallel programming
+        Result := SystemInfo.dwNumberOfProcessors;         //Parallel programming, to turn off set to 1
     end;
 
     Function CharOccurs(const str: string; c: char): integer;

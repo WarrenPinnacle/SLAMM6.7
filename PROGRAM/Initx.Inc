@@ -122,8 +122,10 @@ Var  CategoryLoop      : Integer;
 
        {------------------------------------------------------}
        Procedure ProcessCell(ProcRow,ProcCol: Integer; LastCell: Boolean);
+       { Run for every cell of the CategoryLoop}
+
        Var ProcCat: Integer;
-           CellIsWetlandCategory: Boolean;
+           CellIsWetlandCategory: Boolean;   // is this cell in the relevant CategoryLoop?
            CellIsWater: Boolean;
            Cl: CompressedCell;
            CellSubSiteN : Integer;
@@ -150,12 +152,13 @@ Var  CategoryLoop      : Integer;
          If ONLY_PREPROC_NODATA then
            if (CatElev(@Cl,ProcCat)<998.5) then CellIsWetlandCategory := False;  //no data tagged with 999
 
-         {"Boost" fresh water cells that have initial conditions below the salt boundary due to low precision DEM}
-         If (not CellIsWetlandCategory and Categories.GetCat(ProcCat).IsTidal) then if    // 12/17/2009 removed TidalFreshMarsh,TidalSwamp as we now know that they are below the salt boundary in most cases
+         {"Boost" non-tidal cells that have initial conditions below the salt boundary due to low precision DEM}
+         {If the cell is non tidal and is above salt boundary, set CellIsWetlandCategory to false so it is ignored}
+         If (not Categories.GetCat(ProcCat).IsTidal) then if   // 12/17/2009 removed any tidal categories for boosting (TidalFreshMarsh,TidalSwamp) as we now know that they are below the salt boundary in most cases
              ((CatElev(@Cl,ProcCat)>CurrentSubSite.SaltElev) or ((ProcCat<>Categories.UndDryLand) and (FwInfluenced(ProcRow,ProcCol)))) then CellIsWetlandCategory := False;
               {don't boost cells above the salt bound}              {don't boost wetland cells in an estuary}
 
-         {Either:      Cell is water                                                    (case 1)
+         { Either:     Cell is water                                                    (case 1)
                        Cell is current wetland category                                 (case 2)
                        Cell is another wetland / dryland category                       (case 3)      }
 
@@ -217,6 +220,8 @@ Var  CategoryLoop      : Integer;
        {------------------------------------------------------}
 
    Begin   {ProcessMap}
+           {run once for each non-open-water land cover category (CategoryLoop)}
+
      Application.ProcessMessages;
 
      SumAdjacentWetlandCells := 0;
@@ -275,7 +280,7 @@ Begin
                              CurrentSubSite := Site.SubSites[NSubSite-1];
                            End;
 
-      {Go through each category, one at a time, and pre-process wetland elevations}
+      {Go through each non-open-water category, one at a time, and pre-process wetland elevations}
       For CategoryLoop := 0 to Categories.NCats-1 do
        If not Categories.GetCat(CategoryLoop).isOpenWater then
          Begin

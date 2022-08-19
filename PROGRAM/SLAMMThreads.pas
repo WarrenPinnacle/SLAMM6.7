@@ -48,6 +48,12 @@ type
     procedure Execute; override;
   end;
 
+  TEucDistThread = class(trunthread)
+  public
+    constructor Create(SS_in: TSLAMM_Simulation; SR,ER: Integer; PS: String; TN:Integer);
+    procedure Execute; override;
+  end;
+
   TUpdateElevsThread = class(trunthread)
   public
     procedure Execute; override;
@@ -138,13 +144,28 @@ Procedure TChngWaterThread.Execute;
 Begin
    UserStop := not SS.ThreadChngWater(StR,EnR,Self);
    ImDone := True;
-   If WaitForResume then
+   WaitForResume;  // If WaitForResume then  fix? 6-6-2021
      Begin
        ImDone := False;
        UserStop := not SS.CalculateMaxFetch(StR,EnR,Self,MaxWE);
        ImDone := True;
      End;
 End;
+{------------------------------ TUpdateElevsThread ------------------------------}
+
+constructor TEucDistThread.Create(SS_in: TSLAMM_Simulation; SR, ER: Integer;
+  PS: String; TN: Integer);
+begin
+   inherited Create(SS_in,SR,ER,PS,TN);
+end;
+
+Procedure TEucDistThread.Execute;
+Begin
+   UserStop := not SS.ThreadCalcEucDistances(StR,EnR,Self);
+   ImDone := True;
+End;
+
+
 
 {------------------------------ TUpdateElevsThread ------------------------------}
 

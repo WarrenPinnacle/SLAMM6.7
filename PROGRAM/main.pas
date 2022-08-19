@@ -64,6 +64,7 @@ type
     ModifiedLabel: TLabel;
     LargeRasterButton: TButton;
     CarbonSeq: TButton;
+    Button1: TButton;
     procedure ExecuteButtonClick(Sender: TObject);
     procedure SetMapClick(Sender: TObject);
     procedure SalinityButtonClick(Sender: TObject);
@@ -95,11 +96,15 @@ type
     procedure ElevationButtonClick(Sender: TObject);
     procedure LargeRasterButtonClick(Sender: TObject);
     procedure CarbonSeqClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
      SaveCancel: Boolean;
      Procedure UpdateRecentlyUsed;
      Procedure WriteIniFileData;
      Procedure ReadIniFileData;
+     Function CRSX(inx: double): double;
+     Function CRSY(iny: double): double;
+
     { Private declarations }
   public
     SS: TSLAMM_Simulation;
@@ -204,10 +209,10 @@ Begin
       ModifiedLabel.Visible := False;
 
 {$IFDEF Win32}
-      Mainform.Caption := 'SLAMM v6.7.1 beta, June 2019, 32-bit';
+      Mainform.Caption := 'SLAMM v6.7.3, Aug 2022, 32-bit';
 {$ENDIF}
 {$IFDEF Win64}          // Delphi and fpc of 32 Bit Windows
-      Mainform.Caption := 'SLAMM v6.7.1 beta, June 2019, 64-bit';
+      Mainform.Caption := 'SLAMM v6.7.3 Aug 2022, June 2021, 64-bit';
 {$ENDIF}
 
     End
@@ -524,6 +529,8 @@ end;
 procedure TMainForm.SetMapClick(Sender: TObject);
 Var SaveRescale: Integer;
 begin
+  SS.CPUs := GetLogicalCPUCount;
+
   SaveRescale := SS.RescaleMap;
   SS.RescaleMap := 1;
   SS.ScaleCalcs;
@@ -937,7 +944,54 @@ begin
 
 end;
 
+Function TMainForm.CRSX(inx: double): double;
+Begin
+  result := inx*SS.Site.ReadScale+SS.Site.LLXCorner;
+End;
+
+Function TMainForm.CRSY(iny: double): double;
+Begin
+  result := -iny*SS.Site.ReadScale+ SS.Site.LLYCorner + SS.Site.ReadRows*SS.Site.ReadScale;
+End;
 
 
+procedure TMainForm.Button1Click(Sender: TObject);
+Var WKTFile: TextFile;
+  i,j : Integer;
+  Sub: TSubsite;
+begin
+  // Export Raster Geometry
+  If SS= nil then exit;
+  SaveDialog1.InitialDir  := ExtractFilePath(SS.FileN);
+
+  SaveCancel := True;
+  SaveDialog1.Title:='Select CSV to Save WKT results to ';
+  SaveDialog1.Filter := 'CSV files (*.CSV)|*.csv';
+  SaveDialog1.FileName := SS.FileN;
+  If not SaveDialog1.Execute then exit;
+
+  Assignfile(WKTFile,SaveDialog1.FileName);
+  Rewrite(WKTFile);
+  Writeln(WKTFile,'WKT,Num,Name');
+  for i := 1 to SS.Site.NSubSites do
+     Begin
+       Write(WKTFile,'"MULTIPOLYGON (((');
+       if (i= 0) then Sub := SS.Site.GlobalSite  // not used
+                 else Sub := SS.Site.Subsites[i-1];
+       for j := 0 to Sub.SavePoly.NumPts -1 do
+         Begin
+           Write(WKTFile,CRSX(Sub.SavePoly.TPoints[j].X),' ',CRSY(Sub.SavePoly.TPoints[j].Y));
+           if (J<Sub.SavePoly.NumPts -1) then Write(WKTFile,',');
+         End;
+       Writeln(WKTFile,')))",',i,',"'+Sub.Description+'"')
+     End;
+
+  Closefile(WKTFile);
+
+  MessageDlg('Saved to '+SaveDialog1.FileName,mtConfirmation,[mbOK],0);
+
+  UpdateScreen;
+
+end;
 
 end.

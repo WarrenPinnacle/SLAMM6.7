@@ -970,21 +970,21 @@ End;
 
 // SAV CODE BELOW
 
-
-Function TSLAMM_Simulation.CalculateEucDistances: Boolean;
 Type TPointArr = Array of TPoint;
+Var  MLLWArr, MHHWArr: TPointArr;
+     NMLLW, NMHHW: Integer;
+
+
+Function TSLAMM_Simulation.ThreadCalcEucDistances(StartRow,EndRow: Integer; PRunThread: Pointer):Boolean;
+
 Var ER, EC: Integer;
     Cl: CompressedCell;
     Cat: Integer;
     CellElev: Double;
-    subsite:TSubsite;
-    MLLWArr, MHHWArr: TPointArr;
     ThisPt: TPoint;
-    NMLLW, NMHHW: Integer;
     PMLLW: TPoint;
     PMHHW: TPoint;
 
-Const Tolerance = 0.03; {m, close enough to MLLW or MHHW to be considered part of the contour}
 
     Function Distance_2ptsM(P1,P2: TPoint):Double;
     Begin  {returns distance between two cells in m}
@@ -996,13 +996,6 @@ Const Tolerance = 0.03; {m, close enough to MLLW or MHHW to be considered part o
 
     End;
 
-     Procedure AddToArray(Var Arr: TPointArr; Var Counter: Integer);
-     Begin
-       Inc(Counter);
-       If Counter>Length(Arr) then SetLength(Arr,Counter+2000);
-       Arr[Counter-1].X := EC;
-       Arr[Counter-1].Y := ER;
-     End;
 
      Function DistanceTo(Var Arr: TPointArr; Var Counter: Integer): Double;
      Var i: Integer;
@@ -1062,6 +1055,71 @@ Const Tolerance = 0.03; {m, close enough to MLLW or MHHW to be considered part o
          End;
      End;
 
+
+Var TCDT: TEucDistThread;
+
+Begin // ThreadCalcEucDistances
+
+  Result := True;
+ // Initialize the initial distance point
+ PMLLW.X := Site.RunRows-1;
+ PMLLW.Y := Site.RunCols-1;
+ PMHHW.X := Site.RunRows-1;
+ PMHHW.Y := Site.RunCols-1;
+
+ //Calculate euclidean distance
+FOR ER := StartRow To EndRow Do
+ FOR EC := 0 To (Site.RunCols-1) Do
+  Begin
+    If EC=0 then
+       Begin
+         if PRunThread<>nil
+         then begin
+               TCDT := PRunThread;
+               if TCDT.Terminated
+                 then Result := False
+                 else Result := TCDT.UpdateProg('Calc. Euclidean Distances '+ '('+ IntToStr(CPUs)+' CPUs) ',Trunc((ER-StartRow)/(EndRow-StartRow+1)*100));
+              end
+         else Begin
+                Result := ProgForm.Update2Gages(Trunc((Er)/Site.RunRows*100),0);
+                ProgForm.ProgressLabel.Caption:='Updating Elevations';
+              End;
+         If Not Result then Exit;
+       End;
+
+     //Get cell
+     RetA(ER, EC, Cl);
+
+     //Get cell category
+     Cat := GetCellCat(@Cl);
+
+     //Get cell elevation
+     CellElev := GetMinElev(@Cl);
+
+     //Initialize distances
+     Cl.D2MLLW := -9999;
+     Cl.D2MHHW := -9999;
+
+     // Calculate the minimum distance to the water lines
+     If (CellElev < 8) and (Categories.GetCat(Cat).AggCat in [SaltMarsh,LowTidal,OpenWater])
+     and (CellElev > -1.9) and (CellElev<0.5) then  // 11/8/2021 MD elevation range widened for NAVD88 tolerance
+       Begin
+         ThisPt.X := EC;
+         ThisPt.Y := ER;
+         Cl.D2MLLW := DistanceTo2(MLLWArr,NMLLW,PMLLW);
+         Cl.D2MHHW := DistanceTo2(MHHWArr,NMHHW,PMHHW);
+       End;
+
+     // Reset the cell
+     SetA(ER, EC, Cl);
+    End;
+
+End;
+
+Function TSLAMM_Simulation.CalculateEucDistances: Boolean;
+Const Tolerance = 0.03; {m, close enough to MLLW or MHHW to be considered part of the contour}
+Var ER, EC: Integer;
+
      Procedure ReadyForExit;
      Begin
        MLLWArr := nil;
@@ -1069,6 +1127,54 @@ Const Tolerance = 0.03; {m, close enough to MLLW or MHHW to be considered part o
        ProgForm.Hide;
      End;
 
+     Procedure AddToArray(Var Arr: TPointArr; Var Counter: Integer);
+     Begin
+       Inc(Counter);
+       If Counter>Length(Arr) then SetLength(Arr,Counter+2000);
+       Arr[Counter-1].X := EC;
+       Arr[Counter-1].Y := ER;
+     End;
+
+
+       Function Parallel_EucDistance: boolean;
+       Var ThreadArr3: Array [0..100] of TEucDistThread;
+
+       Var CCLoop,RowStart,RowEnd,RowsPer: Integer;
+           AllDone, UStop:Boolean;
+        Begin
+          ProgForm.ProgressLabel.Caption:='Calc. Euclidean Distances '+'('+ IntToStr(CPUs)+' CPUs)';
+          For CCLoop := 0 to CPUs -1 do
+            Begin
+              RowsPer := ((Site.RunRows div CPUs)+1);
+              RowStart :=CCLoop * RowsPer;
+              RowEnd := ((CCLoop + 1) * RowsPer) -1;
+              if CCLoop = CPUs-1 then RowEnd := Site.RunRows-1;
+              ThreadArr3[CCLoop] := TEucDistThread.Create(Self,RowStart,RowEnd,'Calculating Euclidean Distance '+'('+ IntToStr(CPUs)+' CPUs) ',CCLoop+1);
+            End;
+
+          repeat
+            Application.processmessages;
+            AllDone := True;
+            UStop := False;
+            For CCLoop := 0 to CPUs -1 do
+              Begin
+                If not ThreadArr3[CCLoop].ImDone then AllDone := False;
+                If ThreadArr3[CCLoop].UserStop then UStop := True;
+              End;
+           until AllDone or UStop;
+
+          For CCLoop := 0 to CPUs -1 do
+           begin
+             ThreadArr3[CCLoop].Free;
+           end;
+
+          Result := not(UStop);
+        End;   {Parallel_Execute}
+
+
+Var  Cl: CompressedCell;
+     CellElev: double;
+    subsite:TSubsite;
 
 Begin
  Result := True;
@@ -1085,7 +1191,7 @@ Begin
    Begin
      If EC=0 then Begin
                     Result := ProgForm.Update2Gages(Trunc((ER)/Site.RunRows*(100)),0);
-                    If Not Result then Begin ReadyForExit; Exit; End;
+                    If Not Result then Begin Result := False; ReadyForExit; Exit; End;
                   End;
 
      RetA(ER, EC, Cl);
@@ -1100,50 +1206,20 @@ Begin
  ProgForm.ProgressLabel.Caption:='Calculating Euclidean Distances';
  ProgForm.Show;
 
- // Initialize the initial distance point
- PMLLW.X := Site.RunRows-1;
- PMLLW.Y := Site.RunCols-1;
- PMHHW.X := Site.RunRows-1;
- PMHHW.Y := Site.RunCols-1;
-
- //Calculate euclidea distance
- FOR ER := 0 To (Site.RunRows-1) Do
-  FOR EC := 0 To (Site.RunCols-1) Do
-   Begin
-     If EC=0 then Begin
-                    Result := ProgForm.Update2Gages(Trunc((ER)/Site.RunRows*(100)),0);
-                    If Not Result then Begin ReadyForExit; Exit; End;
-                  End;
-
-     //Get cell
-     RetA(ER, EC, Cl);
-
-     //Get cell category
-     Cat := GetCellCat(@Cl);
-
-     //Get cell elevation
-     CellElev := GetMinElev(@Cl);
-
-     //Initialize distances
-     Cl.D2MLLW := -9999;
-     Cl.D2MHHW := -9999;
-
-     // Calculate the minimum distance to the water lines
-     If (CellElev < 8) and (Categories.GetCat(Cat).AggCat in [SaltMarsh,LowTidal,OpenWater]) then
-       Begin
-         ThisPt.X := EC;
-         ThisPt.Y := ER;
-         Cl.D2MLLW := DistanceTo2(MLLWArr,NMLLW,PMLLW);
-         Cl.D2MHHW := DistanceTo2(MHHWArr,NMHHW,PMHHW);
-       End;
-
-     // Reset the cell
-     SetA(ER, EC, Cl);
-    End;
+ Result := True;
+  if (CPUs > 1)
+    then Begin Result := Parallel_EucDistance;  Exit;  End
+    else Result := ThreadCalcEucDistances(0,Site.RunRows-1,nil);
 
   ReadyForExit;
 
 End;
+
+
+
+
+
+
 
 Function TSLAMM_Simulation.CalculateProbSAV(ShowMsg:Boolean): Boolean;
 CONST DEBUG_INFO = FALSE; // change filenames below

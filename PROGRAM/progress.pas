@@ -75,7 +75,7 @@ begin
   for i := 1 to 100 do
     ThreadProg[i] := 100;
   LastUpdate := Now();
-
+  CPUs := GetLogicalCPUCount;
 end;
 
 procedure TProgForm.FormHide(Sender: TObject);
