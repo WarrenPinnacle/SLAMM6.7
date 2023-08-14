@@ -32,7 +32,7 @@ Type
     Function GetNextNumber(Var Num: Single): Boolean;
 
     Function PrepareFileForReading:Boolean; overload;
-    Function PrepareFileForReading(ErrMsg:String):Boolean; Overload;
+    Function PrepareFileForReading(Var ErrMsg:String):Boolean; Overload;
 
     Function ConvertToBinary: Boolean;
     Function ConvertToASCII(Var OutMsg: String): Boolean;
@@ -50,7 +50,7 @@ Type TSLAMMOutputFile = Class(TSLAMMFile)
     NumList : Array of single;
 
     Function WriteHeader(Prompt: Boolean): Boolean;  overload;
-    Function WriteHeader(Prompt: Boolean; ErrMsg: String): Boolean; overload;
+    Function WriteHeader(Prompt: Boolean; Var ErrMsg: String): Boolean; overload;
     Procedure CR;            // carriage return, if relevant (text output)
     Function WriteNextNumber(Num: Single; LastNumber: Boolean): Boolean;
     Constructor Create(nc,nr: Integer; xll,yll,sz: Double; FN: String);  //use "SLB" extension to signify binary output
@@ -130,7 +130,7 @@ End;
 
 
 
-function TSLAMMInputFile.PrepareFileForReading(ErrMsg:String): Boolean;
+function TSLAMMInputFile.PrepareFileForReading(Var ErrMsg:String): Boolean;
 Var ReadStr: String;
 begin
   Result := True;
@@ -359,7 +359,7 @@ begin
   If Not Result then ShowMessage(ErrMsg);
 end;
 
-function TSLAMMOutputFile.WriteHeader(Prompt: Boolean; ErrMsg: String): Boolean;
+function TSLAMMOutputFile.WriteHeader(Prompt: Boolean; var ErrMsg: String): Boolean;
 Var FileNPrompt: Boolean;
 begin
   Result := True;
