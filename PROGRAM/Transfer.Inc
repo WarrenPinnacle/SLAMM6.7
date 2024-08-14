@@ -943,6 +943,7 @@ Var TotErosion: Double;
     {-------------------------------------------------------------------------------------------------}
     Procedure AddToWidth;
     Var AC: CompressedCell; {Adjacent Offshore Cell}
+    var cat: integer;
     Begin
        RetA(AdjRow,AdjCol,AC);
 
@@ -950,7 +951,9 @@ Var TotErosion: Double;
          then WidthErodedOS := WidthErodedOS + CellWidth(@AC,Clss)
          else EdgeFound := True;
 
-       If EdgeFound and not((GetBit(MostlyWater,AdjRow,AdjCol)) or (GetCellCat(@AC) = Categories.EstuarineWater)) then WidthErodedOS := 1e6;  {not adjacent to water, no erosion, modified 6/16/2019}
+       cat := GetCellCat(@AC);
+       If EdgeFound and not((GetBit(MostlyWater,AdjRow,AdjCol)) or
+           (cat = Categories.EstuarineWater) or (cat = Categories.OpenOcean)) then WidthErodedOS := 1e6;  {not adjacent to water, no erosion, modified 6/16/2019}
        WidthErodedOS := WidthErodedOS + (0.01 * ErodeMatrix[Site.RunCols*(AdjRow)+(AdjCol)]);  // account for erosion that already occurred here this time step
          {m}                  {m}       {m/cm}      {cm}
     End;

@@ -205,7 +205,11 @@ Var TSS: TSLAMM_Simulation;
         If AdjCell(LeeR,LeeC,False) then
           Begin
             TSS.RetA(LeeR,LeeC,C2);
-            If CellWidth(@C2,EWCat) > 0 then OceanNearer := False;
+            If CellWidth(@C2,EWCat) > 0 then
+              Begin
+                OceanNearer := False;
+                Exit;
+              End;
           End;
     End;
     {--------------------------------------------------------------------}

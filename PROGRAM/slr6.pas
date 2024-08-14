@@ -2572,7 +2572,7 @@ Begin       // PROCEDURE CopyMapsToMSWord
 
     If DucksMaps then
       Begin
-        GridForm.GraphBox.ItemIndex := 11;
+        GridForm.GraphBox.ItemIndex := 12;
         Result := GridForm.DrawEntireMap(0,True,False);
         If Not Result then Exit;
         GridForm.RunPanel.Visible := True;
@@ -2581,7 +2581,7 @@ Begin       // PROCEDURE CopyMapsToMSWord
 
     If ConnectMaps then
       Begin
-        GridForm.GraphBox.ItemIndex := 12;
+        GridForm.GraphBox.ItemIndex := 13;
         Result := GridForm.DrawEntireMap(0,True,False);
         If Not Result then Exit;
         GridForm.RunPanel.Visible := True;
@@ -2590,7 +2590,7 @@ Begin       // PROCEDURE CopyMapsToMSWord
 
     If InundMaps then
       Begin
-        GridForm.GraphBox.ItemIndex := 13;
+        GridForm.GraphBox.ItemIndex := 14;
         Result := GridForm.DrawEntireMap(0,True,False);
         If Not Result then Exit;
         GridForm.RunPanel.Visible := True;
@@ -2610,7 +2610,7 @@ Begin       // PROCEDURE CopyMapsToMSWord
 
     If SAVMaps then
       Begin
-        GridForm.GraphBox.ItemIndex := 14;
+        GridForm.GraphBox.ItemIndex := 15;
         Result := GridForm.DrawEntireMap(0,True,False);
         If Not Result then Exit;
         GridForm.RunPanel.Visible := True;
